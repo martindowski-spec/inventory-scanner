@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copier Parts Inventory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; height: 100vh; display: flex; flex-direction: column; }
+        .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+        .container { flex: 1; padding: 20px; overflow-y: auto; }
+        .input-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; background: #16a34a; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #15803d; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat { background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-label { font-size: 12px; color: #666; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #2563eb; }
+        .item { background: white; padding: 12px; margin-bottom: 10px; border-left: 4px solid #2563eb; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .item-code { font-weight: bold; font-family: monospace; }
+        .item-count { font-size: 20px; font-weight: bold; color: #16a34a; }
+        .btn-small { padding: 5px 10px; font-size: 12px; background: #dc2626; margin-left: 5px; }
+        .empty { text-align: center; color: #999; padding: 40px; }
+        .footer { background: white; padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+        .footer button { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 Copier Parts Inventory</h1>
+        <p>Type or scan part numbers</p>
+    </div>
+
+    <div class="container">
+        <div class="input-box">
+            <input type="text" id="input" placeholder="Enter part number..." autofocus>
+            <button onclick="addItem()">Add</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Unique Parts</div>
+                <div class="stat-value" id="uniqueCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Total Items</div>
+                <div class="stat-value" id="totalCount">0</div>
+            </div>
+        </div>
+
+        <div id="list"></div>
+    </div>
+
+    <div class="footer">
+        <button onclick="exportCSV()">📥 Export CSV</button>
+        <button onclick="clearAll()" style="background: #999;">🗑️ Clear</button>
+    </div>
+
+    <script>
+        let inventory = JSON.parse(localStorage.getItem('inventory') || '{}');
+        const input = document.getElementById('input');
+
+        function addItem() {
+            const code = input.value.trim();
+            if (!code) return alert('Enter a part number');
+            
+            if (inventory[code]) {
+                inventory[code]++;
+            } else {
+                inventory[code] = 1;
+            }
+            
+            input.value = '';
+            update();
+            input.focus();
+        }
+
+        function deleteItem(code) {
+            delete inventory[code];
+            update();
+        }
+
+        function update() {
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            
+            const uniqueCount = Object.keys(inventory).length;
+            const totalCount = Object.values(inventory).reduce((a, b) => a + b, 0);
+            
+            document.getElementById('uniqueCount').textContent = uniqueCount;
+            document.getElementById('totalCount').textContent = totalCount;
+            
+            let html = '';
+            if (uniqueCount === 0) {
+                html = '<div class="empty">No items yet</div>';
+            } else {
+                Object.entries(inventory).forEach(([code, count]) => {
+                    html += `
+                        <div class="item">
+                            <div>
+                                <div class="item-code">${code}</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span class="item-count">${count}</span>
+                                <button class="btn-small" onclick="deleteItem('${code}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('list').innerHTML = html;
+        }
+
+        function exportCSV() {
+            let csv = 'Part Number,Quantity\n';
+            Object.entries(inventory).forEach(([code, count]) => {
+                csv += `"${code}",${count}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'inventory.csv';
+            a.click();
+        }
+
+        function clearAll() {
+            if (confirm('Clear all items?')) {
+                inventory = {};
+                update();
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+
+        update();
+    </script>
+</body>
+</html>
