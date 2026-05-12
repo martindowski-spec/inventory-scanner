@@ -346,11 +346,14 @@
     <!-- Tech Login Screen -->
     <div class="screen active" id="techLoginScreen">
         <div class="header">
-            <h1>MBS TechTools</h1>
-            <p>Select your name to continue</p>
+            <div style="text-align: center;">
+                <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" style="max-width: 200px; margin-bottom: 16px;">
+                <h1>MBS TechTools</h1>
+                <p>Select your name to continue</p>
+            </div>
         </div>
-        <div class="content">
-            <div style="max-width: 400px; margin: 40px auto;">
+        <div class="content" style="display: flex; align-items: center; justify-content: center; min-height: 50vh;">
+            <div style="max-width: 400px; width: 100%;">
                 <div class="form-group">
                     <label>Search Your Name</label>
                     <input type="text" id="techSearch" placeholder="Start typing..." oninput="filterTechs()" autocomplete="off">
@@ -529,9 +532,14 @@
 
     <!-- Admin Login -->
     <div class="screen" id="adminLoginScreen">
-        <div class="header"><h1>Admin Login</h1></div>
-        <div class="content">
-            <div style="max-width: 400px; margin: 40px auto;">
+        <div class="header">
+            <div style="text-align: center;">
+                <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" style="max-width: 200px; margin-bottom: 16px;">
+                <h1>Admin Login</h1>
+            </div>
+        </div>
+        <div class="content" style="display: flex; align-items: center; justify-content: center; min-height: 50vh;">
+            <div style="max-width: 400px; width: 100%;">
                 <form onsubmit="adminLogin(event)">
                     <div class="form-group">
                         <label>Username</label>
@@ -882,6 +890,8 @@
                     <div class="card">
                         <strong>${item.itemNumber}</strong>
                         <div class="card-meta">Quantity: ${item.quantity}</div>
+                        <div class="card-meta">Equipment: ${item.equipmentId}</div>
+                        ${item.model ? `<div class="card-meta">Model: ${item.model}</div>` : ''}
                     </div>
                 `).join('')}
                 
@@ -1034,12 +1044,12 @@
                 <form id="meterForm" onsubmit="submitMeters(event, ${id})">
                     ${meter.equipment.map((eq, idx) => `
                         <div class="card">
-                            <div class="card-title">${eq.model}</div>
+                            <div class="card-title">${eq.model || 'Equipment'}</div>
                             <div class="card-meta">Equipment ID: ${eq.equipmentId}</div>
                             
-                            ${eq.meterType === 'BW' || eq.meterType === 'Both' ? `
+                            ${eq.meterType === 'Black' || eq.meterType === 'Both' ? `
                                 <div class="form-group">
-                                    <label>Black & White Count</label>
+                                    <label>Black Count</label>
                                     <input type="number" name="bw_${idx}" min="0" required>
                                 </div>
                             ` : ''}
@@ -1471,6 +1481,14 @@
                     <label>Quantity</label>
                     <input type="number" name="itemQty_${id}" value="1" min="1" required>
                 </div>
+                <div class="form-group">
+                    <label>Equipment ID</label>
+                    <input type="text" name="equipId_${id}" required placeholder="MBS sticker number">
+                </div>
+                <div class="form-group">
+                    <label>Model (Optional)</label>
+                    <input type="text" name="equipModel_${id}" placeholder="e.g., Ricoh MP 4055">
+                </div>
             `;
             container.appendChild(item);
         }
@@ -1494,7 +1512,9 @@
                 const inputs = item.querySelectorAll('input');
                 delivery.items.push({
                     itemNumber: inputs[0].value,
-                    quantity: inputs[1].value
+                    quantity: inputs[1].value,
+                    equipmentId: inputs[2].value,
+                    model: inputs[3].value || ''
                 });
             });
             
@@ -1527,9 +1547,11 @@
         
         function exportDeliveries() {
             const completed = deliveries.filter(d => d.status === 'delivered');
-            let csv = 'Customer,Address,Assigned To,Items,Delivered,Signed By,Notes\n';
+            let csv = 'Customer,Address,Assigned To,Item Number,Quantity,Equipment ID,Model,Delivered,Signed By,Notes\n';
             completed.forEach(d => {
-                csv += `"${d.customerName}","${d.address || ''}","${d.assignedTo}","${d.items.length}","${new Date(d.deliveredAt).toLocaleString()}","${d.customerPrintName}","${d.deliveryNotes || ''}"\n`;
+                d.items.forEach(item => {
+                    csv += `"${d.customerName}","${d.address || ''}","${d.assignedTo}","${item.itemNumber}","${item.quantity}","${item.equipmentId || ''}","${item.model || ''}","${new Date(d.deliveredAt).toLocaleString()}","${d.customerPrintName}","${d.deliveryNotes || ''}"\n`;
+                });
             });
             downloadCSV(csv, 'deliveries');
         }
@@ -1562,7 +1584,7 @@
                     <div class="card">
                         <div class="card-title">${m.customerName} → ${m.assignedTo}</div>
                         <div class="card-meta">Completed ${new Date(m.completedAt).toLocaleDateString()}</div>
-                        ${m.equipment.map(eq => `<div class="card-meta">${eq.model}: BW=${eq.bwReading || 'N/A'}, Color=${eq.colorReading || 'N/A'}</div>`).join('')}
+                        ${m.equipment.map(eq => `<div class="card-meta">${eq.model || eq.equipmentId}: Black=${eq.bwReading || 'N/A'}, Color=${eq.colorReading || 'N/A'}</div>`).join('')}
                     </div>
                 `).join('')}
             `;
@@ -1602,15 +1624,15 @@
                     <input type="text" name="equipId_${id}" required placeholder="MBS sticker number">
                 </div>
                 <div class="form-group">
-                    <label>Model</label>
-                    <input type="text" name="equipModel_${id}" required placeholder="e.g., Ricoh MP 4055">
+                    <label>Model (Optional)</label>
+                    <input type="text" name="equipModel_${id}" placeholder="e.g., Ricoh MP 4055">
                 </div>
                 <div class="form-group">
                     <label>Meter Type</label>
                     <select name="meterType_${id}" required>
-                        <option value="BW">Black & White Only</option>
+                        <option value="Black">Black Only</option>
                         <option value="Color">Color Only</option>
-                        <option value="Both">Both B&W and Color</option>
+                        <option value="Both">Both Black and Color</option>
                     </select>
                 </div>
             `;
@@ -1669,10 +1691,10 @@
         
         function exportMeters() {
             const completed = meters.filter(m => m.status === 'completed');
-            let csv = 'Customer,Address,Tech,Equipment ID,Model,BW Reading,Color Reading,Completed\n';
+            let csv = 'Customer,Address,Tech,Equipment ID,Model,Black Reading,Color Reading,Completed\n';
             completed.forEach(m => {
                 m.equipment.forEach(eq => {
-                    csv += `"${m.customerName}","${m.address || ''}","${m.assignedTo}","${eq.equipmentId}","${eq.model}","${eq.bwReading || ''}","${eq.colorReading || ''}","${new Date(m.completedAt).toLocaleString()}"\n`;
+                    csv += `"${m.customerName}","${m.address || ''}","${m.assignedTo}","${eq.equipmentId}","${eq.model || ''}","${eq.bwReading || ''}","${eq.colorReading || ''}","${new Date(m.completedAt).toLocaleString()}"\n`;
                 });
             });
             downloadCSV(csv, 'meters');
