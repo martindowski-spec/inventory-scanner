@@ -87,7 +87,46 @@
                     <input type="text" id="techSearch" placeholder="Start typing..." oninput="filterTechs()" autocomplete="off">
                 </div>
                 <div class="search-results" id="techResults" style="display: none;"></div>
+                <button class="btn btn-outline" onclick="showScreen('adminLoginScreen')" style="margin-top: 16px;">Admin Login</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div class="screen" id="adminLoginScreen">
+        <div class="header">
+            <h1>Admin Login</h1>
+        </div>
+        <div class="content">
+            <div style="max-width: 400px; margin: 40px auto;">
+                <form onsubmit="adminLogin(event)">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="adminUser" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="adminPass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-outline" onclick="showScreen('techLoginScreen')">Back</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="screen" id="adminDashboard">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div><h1>Admin Dashboard</h1></div>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        </div>
+        <div class="content">
+            <h3>Transfers</h3>
+            <div id="adminTransfers"></div>
+            
+            <h3 style="margin-top: 24px;">Toner Returns</h3>
+            <div id="adminReturns"></div>
         </div>
     </div>
 
@@ -524,6 +563,88 @@
             toast.textContent = msg;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function adminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            if (user === 'admin' && pass === 'mbs2024') {
+                document.getElementById('bottomNav').style.display = 'none';
+                loadAdminDashboard();
+                showScreen('adminDashboard');
+            } else {
+                showToast('Invalid credentials');
+            }
+        }
+        
+        function adminLogout() {
+            showScreen('techLoginScreen');
+        }
+        
+        function loadAdminDashboard() {
+            // Transfers
+            const pendingTransfers = transfers.filter(t => t.status === 'pending');
+            const adminTransfersEl = document.getElementById('adminTransfers');
+            
+            if (pendingTransfers.length === 0) {
+                adminTransfersEl.innerHTML = '<div class="card"><p style="color: var(--text-light);">No pending transfers</p></div>';
+            } else {
+                adminTransfersEl.innerHTML = pendingTransfers.map(t => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${t.techName} ← ${t.transferFrom}
+                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeTransfer(${t.id})">Mark Complete</button>
+                        </div>
+                        <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
+                        <div class="card-meta">${t.items.map(i => `${i.partNumber} (x${i.quantity})`).join(', ')}</div>
+                        ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">Notes: ${t.notes}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            
+            // Returns
+            const pendingReturns = returns.filter(r => r.status === 'pending');
+            const adminReturnsEl = document.getElementById('adminReturns');
+            
+            if (pendingReturns.length === 0) {
+                adminReturnsEl.innerHTML = '<div class="card"><p style="color: var(--text-light);">No pending returns</p></div>';
+            } else {
+                adminReturnsEl.innerHTML = pendingReturns.map(r => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${r.techName} - ${r.customerName}
+                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeReturn(${r.id})">Mark Complete</button>
+                        </div>
+                        <div class="card-meta">Equipment: ${r.equipmentId}</div>
+                        <div class="card-meta">${new Date(r.date).toLocaleDateString()}</div>
+                        <div class="card-meta">${r.items.map(i => `${i.itemNumber} (x${i.quantity}) - ${i.condition}`).join(', ')}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function completeTransfer(id) {
+            const idx = transfers.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                transfers[idx].status = 'completed';
+                transfers[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                loadAdminDashboard();
+                showToast('Transfer marked complete');
+            }
+        }
+        
+        function completeReturn(id) {
+            const idx = returns.findIndex(r => r.id === id);
+            if (idx !== -1) {
+                returns[idx].status = 'completed';
+                returns[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_returns', JSON.stringify(returns));
+                loadAdminDashboard();
+                showToast('Return marked complete');
+            }
         }
     </script>
 </body>
