@@ -363,9 +363,12 @@
 
     <!-- Tech Dashboard -->
     <div class="screen" id="techDashboard">
-        <div class="header">
-            <h1>Welcome, <span id="techFirstName"></span></h1>
-            <p>MBS TechTools</p>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Welcome, <span id="techFirstName"></span></h1>
+                <p>MBS TechTools</p>
+            </div>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
         </div>
         <div class="content">
             <div class="welcome-card">
@@ -378,31 +381,46 @@
 
     <!-- Deliveries List -->
     <div class="screen" id="deliveriesScreen">
-        <div class="header"><h1>Toner Deliveries</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Toner Deliveries</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="deliveriesList"></div>
     </div>
 
     <!-- Delivery Detail -->
     <div class="screen" id="deliveryDetailScreen">
-        <div class="header"><h1>Delivery Details</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Delivery Details</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="deliveryDetailContent"></div>
     </div>
 
     <!-- Meters List -->
     <div class="screen" id="metersScreen">
-        <div class="header"><h1>Meter Readings</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Meter Readings</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="metersList"></div>
     </div>
 
     <!-- Meter Entry -->
     <div class="screen" id="meterEntryScreen">
-        <div class="header"><h1>Enter Meters</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Enter Meters</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="meterEntryContent"></div>
     </div>
 
     <!-- Transfers Screen -->
     <div class="screen" id="transfersScreen">
-        <div class="header"><h1>Transfer Requests</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Transfer Requests</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content">
             <button class="btn btn-primary" onclick="showTransferForm()">New Transfer Request</button>
             <div id="transfersList"></div>
@@ -411,7 +429,10 @@
 
     <!-- Transfer Form -->
     <div class="screen" id="transferFormScreen">
-        <div class="header"><h1>New Transfer Request</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>New Transfer Request</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content">
             <form id="transferForm" onsubmit="submitTransfer(event)">
                 <div class="form-group">
@@ -441,7 +462,10 @@
 
     <!-- Returns Screen -->
     <div class="screen" id="returnsScreen">
-        <div class="header"><h1>Toner Returns</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Toner Returns</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content">
             <button class="btn btn-primary" onclick="showReturnForm()">Submit Toner Return</button>
             <div id="returnsList"></div>
@@ -450,7 +474,10 @@
 
     <!-- Return Form -->
     <div class="screen" id="returnFormScreen">
-        <div class="header"><h1>Submit Toner Return</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Submit Toner Return</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content">
             <form id="returnForm" onsubmit="submitReturn(event)">
                 <div class="form-group">
@@ -484,13 +511,19 @@
 
     <!-- Inventory View -->
     <div class="screen" id="inventoryScreen">
-        <div class="header"><h1>Parts Inventory</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Parts Inventory</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="inventoryList"></div>
     </div>
 
     <!-- Completed Tasks -->
     <div class="screen" id="completedScreen">
-        <div class="header"><h1>Completed Tasks</h1></div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Completed Tasks</h1>
+            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        </div>
         <div class="content" id="completedList"></div>
     </div>
 
@@ -536,6 +569,84 @@
             <div id="adminReturns" style="display: none;"></div>
             <div id="adminInventory" style="display: none;"></div>
             <div id="adminParts" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Admin Create Delivery Form -->
+    <div class="screen" id="adminDeliveryFormScreen">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Create Delivery Order</h1>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        </div>
+        <div class="content">
+            <form id="adminDeliveryForm" onsubmit="submitAdminDelivery(event)">
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="deliveryCustomerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Address (Optional)</label>
+                    <input type="text" id="deliveryAddress">
+                </div>
+                <div class="form-group">
+                    <label>Assign To Tech</label>
+                    <select id="deliveryAssignTo" required></select>
+                </div>
+                <div class="form-group">
+                    <label>PDF Link (Optional)</label>
+                    <input type="url" id="deliveryPdfUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="deliveryUrgent" style="width: auto; margin-right: 8px;">
+                        Mark as URGENT
+                    </label>
+                </div>
+                
+                <h3 style="margin: 24px 0 12px;">Items to Deliver</h3>
+                <div id="deliveryItems"></div>
+                <button type="button" class="btn btn-outline" onclick="addDeliveryItem()">+ Add Item</button>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Create Delivery Order</button>
+                <button type="button" class="btn btn-outline" onclick="cancelAdminDeliveryForm()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Create Meter Form -->
+    <div class="screen" id="adminMeterFormScreen">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Create Meter Request</h1>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        </div>
+        <div class="content">
+            <form id="adminMeterForm" onsubmit="submitAdminMeter(event)">
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="meterCustomerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Address (Optional)</label>
+                    <input type="text" id="meterAddress">
+                </div>
+                <div class="form-group">
+                    <label>Assign To Tech</label>
+                    <select id="meterAssignTo" required></select>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="meterUrgent" style="width: auto; margin-right: 8px;">
+                        Mark as URGENT
+                    </label>
+                </div>
+                
+                <h3 style="margin: 24px 0 12px;">Equipment</h3>
+                <div id="meterEquipment"></div>
+                <button type="button" class="btn btn-outline" onclick="addMeterEquipment()">+ Add Equipment</button>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Create Meter Request</button>
+                <button type="button" class="btn btn-outline" onclick="cancelAdminMeterForm()">Cancel</button>
+            </form>
         </div>
     </div>
 
@@ -683,6 +794,15 @@
             document.getElementById('techFullName').textContent = currentTech.full;
             loadTechDashboard();
             showScreen('techDashboard');
+        }
+        
+        function techLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentTech = null;
+                document.getElementById('techSearch').value = '';
+                document.getElementById('techResults').style.display = 'none';
+                showScreen('techLoginScreen');
+            }
         }
         
         // Tech Dashboard
@@ -1277,13 +1397,16 @@
         }
         
         // Admin Deliveries
+        let deliveryItemCounter = 0;
+        let meterEquipmentCounter = 0;
+        
         function loadAdminDeliveries() {
             const pending = deliveries.filter(d => d.status === 'pending');
             const completed = deliveries.filter(d => d.status === 'delivered');
             
             const el = document.getElementById('adminDeliveries');
             el.innerHTML = `
-                <button class="btn btn-primary" onclick="createDeliveryPrompt()">Create Delivery Order</button>
+                <button class="btn btn-primary" onclick="showAdminDeliveryForm()">Create Delivery Order</button>
                 
                 <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
                 ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending deliveries</p></div>' : pending.map(d => `
@@ -1292,6 +1415,7 @@
                             ${d.customerName} → ${d.assignedTo}
                             ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
                         </div>
+                        <div class="card-meta">${d.address || 'No address'}</div>
                         <div class="card-meta">${d.items.length} items</div>
                         <button class="btn btn-danger btn-small" style="margin-top: 8px;" onclick="deleteDelivery(${d.id})">Delete</button>
                     </div>
@@ -1309,40 +1433,87 @@
             `;
         }
         
-        function createDeliveryPrompt() {
-            const customerName = prompt('Customer Name:');
-            if (!customerName) return;
+        function showAdminDeliveryForm() {
+            // Populate tech dropdown
+            const select = document.getElementById('deliveryAssignTo');
+            select.innerHTML = '<option value="">Select tech...</option>' + 
+                TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
             
-            const address = prompt('Address (optional):');
-            const techNum = prompt(`Assign to:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
-            const techIndex = parseInt(techNum) - 1;
+            // Reset form
+            document.getElementById('deliveryCustomerName').value = '';
+            document.getElementById('deliveryAddress').value = '';
+            document.getElementById('deliveryPdfUrl').value = '';
+            document.getElementById('deliveryUrgent').checked = false;
+            document.getElementById('deliveryItems').innerHTML = '';
+            deliveryItemCounter = 0;
             
-            if (techIndex < 0 || techIndex >= TECHS.length) {
-                showToast('Invalid tech selection');
-                return;
-            }
+            // Add first item
+            addDeliveryItem();
             
-            const itemNumber = prompt('Item Number:');
-            const quantity = prompt('Quantity:');
+            showScreen('adminDeliveryFormScreen');
+        }
+        
+        function addDeliveryItem() {
+            const id = deliveryItemCounter++;
+            const container = document.getElementById('deliveryItems');
+            const item = document.createElement('div');
+            item.className = 'line-item';
+            item.innerHTML = `
+                <div class="line-item-header">
+                    <strong>Item ${container.children.length + 1}</strong>
+                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label>Item Number</label>
+                    <input type="text" name="itemNum_${id}" required>
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" name="itemQty_${id}" value="1" min="1" required>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+        
+        function submitAdminDelivery(e) {
+            e.preventDefault();
             
-            if (!itemNumber || !quantity) return;
-            
-            const urgent = confirm('Mark as URGENT?');
-            
-            deliveries.push({
+            const delivery = {
                 id: Date.now(),
-                customerName,
-                address: address || '',
-                assignedTo: TECHS[techIndex].full,
-                items: [{ itemNumber, quantity }],
+                customerName: document.getElementById('deliveryCustomerName').value,
+                address: document.getElementById('deliveryAddress').value,
+                assignedTo: document.getElementById('deliveryAssignTo').value,
+                pdfUrl: document.getElementById('deliveryPdfUrl').value,
+                urgent: document.getElementById('deliveryUrgent').checked,
+                items: [],
                 status: 'pending',
-                urgent,
                 createdAt: new Date().toISOString()
+            };
+            
+            document.querySelectorAll('#deliveryItems .line-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                delivery.items.push({
+                    itemNumber: inputs[0].value,
+                    quantity: inputs[1].value
+                });
             });
             
+            deliveries.unshift(delivery);
             localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+            
+            showToast('Delivery order created');
+            vibrate();
+            showScreen('adminDashboard');
             loadAdminDeliveries();
-            showToast('Delivery created');
+        }
+        
+        function cancelAdminDeliveryForm() {
+            showScreen('adminDashboard');
+            loadAdminDeliveries();
+        }
+        
+        function createDeliveryPrompt() {
+            showAdminDeliveryForm();
         }
         
         function deleteDelivery(id) {
@@ -1370,7 +1541,7 @@
             
             const el = document.getElementById('adminMeters');
             el.innerHTML = `
-                <button class="btn btn-primary" onclick="createMeterPrompt()">Create Meter Request</button>
+                <button class="btn btn-primary" onclick="showAdminMeterForm()">Create Meter Request</button>
                 
                 <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
                 ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending meters</p></div>' : pending.map(m => `
@@ -1379,7 +1550,9 @@
                             ${m.customerName} → ${m.assignedTo}
                             ${m.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
                         </div>
+                        <div class="card-meta">${m.address || 'No address'}</div>
                         <div class="card-meta">${m.equipment.length} equipment</div>
+                        <button class="btn btn-danger btn-small" style="margin-top: 8px;" onclick="deleteMeter(${m.id})">Delete</button>
                     </div>
                 `).join('')}
                 
@@ -1395,44 +1568,103 @@
             `;
         }
         
-        function createMeterPrompt() {
-            const customerName = prompt('Customer Name:');
-            if (!customerName) return;
+        function showAdminMeterForm() {
+            // Populate tech dropdown
+            const select = document.getElementById('meterAssignTo');
+            select.innerHTML = '<option value="">Select tech...</option>' + 
+                TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
             
-            const address = prompt('Address (optional):');
-            const techNum = prompt(`Assign to:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
-            const techIndex = parseInt(techNum) - 1;
+            // Reset form
+            document.getElementById('meterCustomerName').value = '';
+            document.getElementById('meterAddress').value = '';
+            document.getElementById('meterUrgent').checked = false;
+            document.getElementById('meterEquipment').innerHTML = '';
+            meterEquipmentCounter = 0;
             
-            if (techIndex < 0 || techIndex >= TECHS.length) {
-                showToast('Invalid tech selection');
-                return;
-            }
+            // Add first equipment
+            addMeterEquipment();
             
-            const equipmentId = prompt('Equipment ID:');
-            const model = prompt('Model:');
-            const meterTypeNum = prompt('Meter Type:\n1. BW Only\n2. Color Only\n3. Both\n\nEnter number:');
+            showScreen('adminMeterFormScreen');
+        }
+        
+        function addMeterEquipment() {
+            const id = meterEquipmentCounter++;
+            const container = document.getElementById('meterEquipment');
+            const item = document.createElement('div');
+            item.className = 'line-item';
+            item.innerHTML = `
+                <div class="line-item-header">
+                    <strong>Equipment ${container.children.length + 1}</strong>
+                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label>Equipment ID</label>
+                    <input type="text" name="equipId_${id}" required placeholder="MBS sticker number">
+                </div>
+                <div class="form-group">
+                    <label>Model</label>
+                    <input type="text" name="equipModel_${id}" required placeholder="e.g., Ricoh MP 4055">
+                </div>
+                <div class="form-group">
+                    <label>Meter Type</label>
+                    <select name="meterType_${id}" required>
+                        <option value="BW">Black & White Only</option>
+                        <option value="Color">Color Only</option>
+                        <option value="Both">Both B&W and Color</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+        
+        function submitAdminMeter(e) {
+            e.preventDefault();
             
-            const meterTypes = ['BW', 'Color', 'Both'];
-            const meterType = meterTypes[parseInt(meterTypeNum) - 1];
-            
-            if (!equipmentId || !model || !meterType) return;
-            
-            const urgent = confirm('Mark as URGENT?');
-            
-            meters.push({
+            const meter = {
                 id: Date.now(),
-                customerName,
-                address: address || '',
-                assignedTo: TECHS[techIndex].full,
-                equipment: [{ equipmentId, model, meterType }],
+                customerName: document.getElementById('meterCustomerName').value,
+                address: document.getElementById('meterAddress').value,
+                assignedTo: document.getElementById('meterAssignTo').value,
+                urgent: document.getElementById('meterUrgent').checked,
+                equipment: [],
                 status: 'pending',
-                urgent,
                 createdAt: new Date().toISOString()
+            };
+            
+            document.querySelectorAll('#meterEquipment .line-item').forEach(item => {
+                const inputs = item.querySelectorAll('input, select');
+                meter.equipment.push({
+                    equipmentId: inputs[0].value,
+                    model: inputs[1].value,
+                    meterType: inputs[2].value
+                });
             });
             
+            meters.unshift(meter);
             localStorage.setItem('mbs_meters', JSON.stringify(meters));
-            loadAdminMeters();
+            
             showToast('Meter request created');
+            vibrate();
+            showScreen('adminDashboard');
+            switchAdminTab('meters');
+        }
+        
+        function cancelAdminMeterForm() {
+            showScreen('adminDashboard');
+            switchAdminTab('meters');
+        }
+        
+        function deleteMeter(id) {
+            if (confirm('Delete this meter request?')) {
+                meters = meters.filter(m => m.id !== id);
+                localStorage.setItem('mbs_meters', JSON.stringify(meters));
+                loadAdminMeters();
+                showToast('Meter request deleted');
+            }
+        }
+        
+        function createMeterPrompt() {
+            showAdminMeterForm();
         }
         
         function exportMeters() {
