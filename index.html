@@ -2,427 +2,1050 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#F2F2F7">
     <title>MBS TechTools</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
         :root {
-            --green: #7AB800;
-            --blue: #0091DA;
-            --red: #EF4444;
-            --yellow: #F59E0B;
-            --bg: #F8FAFB;
-            --surface: #FFFFFF;
-            --text: #1E293B;
-            --text-light: #64748B;
-            --border: #E2E8F0;
+            /* MBS brand softened to iOS-pastel */
+            --brand-green: #8FCC3D;
+            --brand-green-soft: #B5DE6E;
+            --brand-green-bg: #F1F8E4;
+            --brand-blue: #4DA9DC;
+            --brand-blue-soft: #7BC1E4;
+            --brand-blue-bg: #E8F4FB;
+            
+            /* iOS system colors */
+            --ios-bg: #F2F2F7;
+            --ios-bg-secondary: #FFFFFF;
+            --ios-bg-grouped: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-separator: rgba(60, 60, 67, 0.12);
+            --ios-separator-opaque: #C6C6C8;
+            
+            /* iOS system text */
+            --ios-label: #000000;
+            --ios-secondary: #3C3C43;
+            --ios-tertiary: rgba(60, 60, 67, 0.6);
+            --ios-quaternary: rgba(60, 60, 67, 0.3);
+            --ios-placeholder: rgba(60, 60, 67, 0.3);
+            
+            /* iOS accents */
+            --ios-blue: #007AFF;
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-yellow: #FFCC00;
+            --ios-green: #34C759;
+            --ios-purple: #AF52DE;
+            --ios-pink: #FF2D55;
+            --ios-gray: #8E8E93;
+            --ios-gray2: #AEAEB2;
+            --ios-gray3: #C7C7CC;
+            --ios-gray4: #D1D1D6;
+            --ios-gray5: #E5E5EA;
+            --ios-gray6: #F2F2F7;
+            
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
         }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            padding-bottom: 70px;
+        
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background: var(--ios-bg);
+            color: var(--ios-label);
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 17px;
+            line-height: 1.3;
+            letter-spacing: -0.022em;
         }
         
-        .screen { display: none; min-height: calc(100vh - 70px); }
-        .screen.active { display: block; }
+        body {
+            padding-bottom: calc(90px + var(--safe-bottom));
+            min-height: 100vh;
+        }
         
-        .header { 
-            background: var(--surface); 
-            padding: 20px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
-            margin-bottom: 20px;
+        /* Screen container */
+        .screen { display: none; min-height: 100vh; animation: fadeIn 0.25s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Large iOS Title header */
+        .ios-header {
+            padding: calc(var(--safe-top) + 8px) 20px 8px;
+            background: var(--ios-bg);
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            background: rgba(242, 242, 247, 0.85);
         }
-        .header h1 { font-size: 24px; font-weight: 700; }
-        .header p { font-size: 14px; color: var(--text-light); margin-top: 4px; }
-        
-        .content { padding: 0 20px 20px; }
-        
-        .btn { 
-            width: 100%; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 15px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            font-family: inherit; 
-            margin-bottom: 12px;
-            transition: transform 0.2s;
+        .ios-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 8px;
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary { background: var(--green); color: white; }
-        .btn-secondary { background: var(--blue); color: white; }
-        .btn-outline { background: white; color: var(--text); border: 2px solid var(--border); }
-        .btn-danger { background: var(--red); color: white; }
-        .btn-small { padding: 8px 14px; font-size: 13px; width: auto; display: inline-block; margin: 0 4px 4px 0; }
-        
-        .card { 
-            background: var(--surface); 
-            border-radius: 12px; 
-            padding: 16px; 
-            margin-bottom: 12px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        .ios-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: 0.374px;
+            line-height: 1.1;
         }
-        .card.urgent { border-left: 4px solid var(--red); }
-        .card.clickable { cursor: pointer; transition: transform 0.2s; }
-        .card.clickable:active { transform: scale(0.98); }
-        .card-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
-        .card-meta { font-size: 13px; color: var(--text-light); margin-top: 4px; }
-        
-        .badge { 
-            display: inline-block; 
-            padding: 4px 10px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            margin-left: 8px;
+        .ios-subtitle {
+            font-size: 15px;
+            color: var(--ios-tertiary);
+            margin-top: 2px;
+            font-weight: 400;
         }
-        .badge-pending { background: var(--yellow); color: white; }
-        .badge-completed { background: var(--green); color: white; }
-        .badge-urgent { background: var(--red); color: white; }
-        
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-bottom: 20px;
+        .ios-header-button {
+            background: none;
+            border: none;
+            color: var(--ios-blue);
+            font-size: 17px;
+            font-weight: 400;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 4px 0;
         }
-        .dashboard-card { 
-            background: linear-gradient(135deg, var(--green), var(--blue)); 
-            border-radius: 12px; 
-            padding: 20px; 
+        .ios-header-button.destructive { color: var(--ios-red); }
+        .ios-header-button:active { opacity: 0.4; }
+        
+        /* Navigation bar (small header for sub-screens) */
+        .nav-bar {
+            padding: calc(var(--safe-top) + 8px) 16px 8px;
+            background: rgba(242, 242, 247, 0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 44px;
+            border-bottom: 0.5px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .nav-bar.scrolled { border-bottom-color: var(--ios-separator); }
+        .nav-bar-title {
+            font-size: 17px;
+            font-weight: 600;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            letter-spacing: -0.408px;
+        }
+        .nav-back {
+            background: none;
+            border: none;
+            color: var(--ios-blue);
+            font-size: 17px;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-weight: 400;
+        }
+        .nav-back:active { opacity: 0.4; }
+        .nav-back svg { width: 12px; height: 20px; }
+        
+        /* Content area */
+        .content { padding: 0 16px 20px; }
+        .content-wide { padding: 0 20px 20px; }
+        
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            margin-bottom: 10px;
+            transition: opacity 0.15s, transform 0.1s;
+            letter-spacing: -0.408px;
+        }
+        .btn:active { opacity: 0.7; transform: scale(0.985); }
+        .btn-primary { 
+            background: var(--brand-green);
+            color: white;
+        }
+        .btn-secondary { 
+            background: var(--brand-blue);
+            color: white;
+        }
+        .btn-tinted {
+            background: var(--brand-blue-bg);
+            color: var(--brand-blue);
+        }
+        .btn-outline {
+            background: var(--ios-card);
+            color: var(--ios-blue);
+            border: none;
+            font-weight: 500;
+        }
+        .btn-danger { 
+            background: var(--ios-red); 
             color: white; 
-            cursor: pointer; 
+        }
+        .btn-plain {
+            background: transparent;
+            color: var(--ios-blue);
+            font-weight: 400;
+            padding: 12px;
+        }
+        .btn-small { 
+            padding: 8px 16px; 
+            font-size: 15px; 
+            width: auto; 
+            display: inline-block; 
+            margin: 0;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        /* Hero card (Fitness app style) */
+        .hero-card {
+            background: linear-gradient(135deg, #8FCC3D 0%, #4DA9DC 100%);
+            border-radius: 20px;
+            padding: 24px;
+            color: white;
+            margin: 8px 0 16px;
+            box-shadow: 0 8px 24px rgba(143, 204, 61, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-greeting {
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hero-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 4px;
+            letter-spacing: -0.5px;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-stat-num {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+        .hero-stat-label {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        /* Widget grid (Fitness/Health style) */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .widget {
+            background: var(--ios-card);
+            border-radius: 18px;
+            padding: 16px;
             min-height: 120px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
-        .dashboard-card:active { transform: scale(0.97); }
-        .dashboard-card h3 { font-size: 16px; margin-bottom: 4px; }
-        .dashboard-card p { font-size: 13px; opacity: 0.9; }
-        .dashboard-card .count { font-size: 28px; font-weight: 800; margin-top: 8px; }
-        
-        .form-group { margin-bottom: 16px; }
-        .form-group label { 
-            display: block; 
-            font-size: 13px; 
-            font-weight: 600; 
+        .widget:active { transform: scale(0.97); opacity: 0.85; }
+        .widget-icon-wrap {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 8px;
         }
-        .form-group input, 
-        .form-group select, 
-        .form-group textarea { 
-            width: 100%; 
-            padding: 12px; 
-            border: 2px solid var(--border); 
-            border-radius: 10px; 
-            font-size: 15px; 
-            font-family: inherit;
+        .widget-icon-wrap svg { width: 20px; height: 20px; }
+        .widget-icon-green { background: var(--brand-green-bg); color: var(--brand-green); }
+        .widget-icon-blue { background: var(--brand-blue-bg); color: var(--brand-blue); }
+        .widget-icon-orange { background: #FFF4E5; color: var(--ios-orange); }
+        .widget-icon-purple { background: #F5EDFB; color: var(--ios-purple); }
+        .widget-icon-pink { background: #FFE8EE; color: var(--ios-pink); }
+        .widget-icon-gray { background: var(--ios-gray5); color: var(--ios-gray); }
+        
+        .widget-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ios-secondary);
+            margin-top: auto;
         }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--blue);
+        .widget-subtitle {
+            font-size: 12px;
+            color: var(--ios-tertiary);
+            margin-top: 2px;
+        }
+        .widget-count {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            margin-top: 4px;
+        }
+        .widget-count-green { color: var(--brand-green); }
+        .widget-count-blue { color: var(--brand-blue); }
+        .widget-count-orange { color: var(--ios-orange); }
+        .widget-count-purple { color: var(--ios-purple); }
+        .widget-count-pink { color: var(--ios-pink); }
+        .widget-count-gray { color: var(--ios-gray); }
+        
+        /* Section headers (iOS style) */
+        .section-header {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--ios-tertiary);
+            text-transform: uppercase;
+            letter-spacing: -0.08px;
+            padding: 24px 16px 6px;
+        }
+        .section-header-large {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ios-label);
+            padding: 24px 0 12px;
+            letter-spacing: 0.35px;
         }
         
-        .search-results { 
-            max-height: 300px; 
-            overflow-y: auto; 
-            border: 2px solid var(--border); 
-            border-radius: 10px; 
-            margin-top: 8px; 
-            background: white;
-        }
-        .search-result { 
-            padding: 12px 16px; 
-            cursor: pointer; 
-            border-bottom: 1px solid var(--border);
-            transition: background 0.2s;
-        }
-        .search-result:hover { background: var(--bg); }
-        .search-result:last-child { border-bottom: none; }
-        
-        .line-item { 
-            background: var(--bg); 
-            padding: 16px; 
-            border-radius: 10px; 
-            margin-bottom: 12px; 
-            border-left: 4px solid var(--blue);
-        }
-        .line-item-header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 12px;
-        }
-        
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: var(--surface); 
-            border-top: 1px solid var(--border); 
-            display: flex; 
-            justify-content: space-around; 
-            padding: 8px 0; 
-            z-index: 1000;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-        .bottom-nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 8px; 
-            cursor: pointer; 
-            color: var(--text-light); 
-            font-size: 11px;
-            transition: color 0.2s;
-        }
-        .bottom-nav-item.active { color: var(--green); }
-        .bottom-nav-item .icon { font-size: 20px; margin-bottom: 4px; }
-        
-        .welcome-card { 
-            background: linear-gradient(135deg, var(--green), var(--blue)); 
-            border-radius: 16px; 
-            padding: 24px; 
-            color: white; 
-            margin-bottom: 20px;
-        }
-        .welcome-card h2 { font-size: 24px; margin-bottom: 4px; }
-        .welcome-card p { font-size: 14px; opacity: 0.9; }
-        
-        .signature-pad { 
-            border: 2px solid var(--border); 
-            border-radius: 10px; 
-            background: white; 
-            cursor: crosshair; 
-            width: 100%; 
-            touch-action: none;
-            display: block;
-        }
-        
-        .tabs { 
-            display: flex; 
-            gap: 4px; 
-            background: var(--bg); 
-            padding: 8px 12px; 
-            overflow-x: auto;
+        /* Grouped list (Settings style) */
+        .list-group {
+            background: var(--ios-card);
+            border-radius: 12px;
+            overflow: hidden;
             margin-bottom: 16px;
         }
-        .tab { 
-            padding: 8px 12px; 
-            border: none; 
-            background: transparent; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            white-space: nowrap; 
-            font-size: 13px;
+        .list-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--ios-card);
+            min-height: 44px;
+            cursor: pointer;
+            position: relative;
         }
-        .tab.active { 
-            background: white; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        .list-row:active { background: var(--ios-gray5); }
+        .list-row:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 16px;
+            right: 0;
+            bottom: 0;
+            height: 0.5px;
+            background: var(--ios-separator);
+        }
+        .list-row-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .list-row-icon svg { width: 18px; height: 18px; color: white; }
+        .list-row-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .list-row-title {
+            font-size: 17px;
+            font-weight: 400;
+            color: var(--ios-label);
+            letter-spacing: -0.408px;
+        }
+        .list-row-subtitle {
+            font-size: 14px;
+            color: var(--ios-tertiary);
+            margin-top: 2px;
+        }
+        .list-row-value {
+            font-size: 17px;
+            color: var(--ios-tertiary);
+            margin-left: 8px;
+        }
+        .chevron {
+            color: var(--ios-gray3);
+            margin-left: 8px;
+            flex-shrink: 0;
         }
         
-        .scanner-area { 
-            position: relative; 
-            background: #000; 
-            height: 400px; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            margin: 20px 0;
+        /* Cards */
+        .card { 
+            background: var(--ios-card); 
+            border-radius: 14px; 
+            padding: 16px; 
+            margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .card.urgent {
+            border-left: 4px solid var(--ios-red);
+        }
+        .card.clickable { cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
+        .card.clickable:active { transform: scale(0.985); opacity: 0.85; }
+        .card-title { 
+            font-weight: 600; 
+            font-size: 17px; 
+            letter-spacing: -0.408px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-meta { 
+            font-size: 14px; 
+            color: var(--ios-tertiary); 
+            margin-top: 4px;
+            letter-spacing: -0.154px;
+        }
+        
+        /* Badges (iOS pill style) */
+        .badge { 
+            display: inline-flex; 
+            align-items: center;
+            padding: 2px 10px; 
+            border-radius: 100px; 
+            font-size: 12px; 
+            font-weight: 600;
+            letter-spacing: -0.078px;
+        }
+        .badge-pending { background: #FFF4E5; color: var(--ios-orange); }
+        .badge-completed { background: var(--brand-green-bg); color: var(--brand-green); }
+        .badge-urgent { background: #FFE8EA; color: var(--ios-red); }
+        
+        /* Floating label form cards */
+        .floating-card {
+            background: var(--ios-card);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .floating-field {
+            position: relative;
+            padding: 0;
+            border-bottom: 0.5px solid var(--ios-separator);
+        }
+        .floating-field:last-child { border-bottom: none; }
+        .floating-field input,
+        .floating-field select,
+        .floating-field textarea {
+            width: 100%;
+            padding: 22px 16px 8px;
+            border: none;
+            background: transparent;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--ios-label);
+            letter-spacing: -0.408px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .floating-field textarea {
+            resize: none;
+            min-height: 90px;
+            padding-top: 26px;
+        }
+        .floating-field select {
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%226%22%20viewBox%3D%220%200%2010%206%22%3E%3Cpath%20fill%3D%22%23C7C7CC%22%20d%3D%22M5%206L0%200h10z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 36px;
+        }
+        .floating-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            font-size: 17px;
+            color: var(--ios-tertiary);
+            pointer-events: none;
+            transition: all 0.2s ease;
+            letter-spacing: -0.408px;
+        }
+        .floating-field input:focus + .floating-label,
+        .floating-field input:not(:placeholder-shown) + .floating-label,
+        .floating-field textarea:focus + .floating-label,
+        .floating-field textarea:not(:placeholder-shown) + .floating-label,
+        .floating-field select:valid + .floating-label,
+        .floating-field.has-value .floating-label {
+            top: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--brand-blue);
+            letter-spacing: 0;
+        }
+        .floating-field input[type="date"] + .floating-label,
+        .floating-field input[type="number"] + .floating-label {
+            top: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--brand-blue);
+        }
+        .floating-field input[readonly] + .floating-label {
+            top: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--ios-tertiary);
+        }
+        .floating-field input[type="checkbox"] {
+            width: auto;
+            margin-right: 12px;
+        }
+        .floating-checkbox-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 0.5px solid var(--ios-separator);
+        }
+        .floating-checkbox-row:last-child { border-bottom: none; }
+        .floating-checkbox-row label {
+            font-size: 17px;
+            color: var(--ios-label);
+            flex: 1;
+        }
+        .ios-switch {
+            position: relative;
+            width: 51px;
+            height: 31px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--ios-gray5);
+            border-radius: 31px;
+            transition: background 0.2s;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ios-switch:checked {
+            background: var(--brand-green);
+        }
+        .ios-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 27px;
+            height: 27px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .ios-switch:checked::after {
+            transform: translateX(20px);
+        }
+        
+        /* Search field */
+        .search-field {
+            background: var(--ios-gray5);
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .search-field input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 17px;
+            font-family: inherit;
+            color: var(--ios-label);
+            letter-spacing: -0.408px;
+        }
+        .search-field input::placeholder { color: var(--ios-tertiary); }
+        .search-field svg { color: var(--ios-tertiary); flex-shrink: 0; }
+        
+        /* Search results */
+        .search-results {
+            background: var(--ios-card);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .search-result {
+            padding: 14px 16px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+        }
+        .search-result:active { background: var(--ios-gray5); }
+        .search-result:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 16px;
+            right: 0;
+            bottom: 0;
+            height: 0.5px;
+            background: var(--ios-separator);
+        }
+        .search-result-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-green), var(--brand-blue));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* Line items in forms */
+        .line-item {
+            background: var(--ios-card);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .line-item-header {
+            padding: 12px 16px;
+            background: var(--ios-gray6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ios-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .line-item-remove {
+            background: none;
+            border: none;
+            color: var(--ios-red);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 4px 8px;
+        }
+        .line-item-remove:active { opacity: 0.5; }
+        
+        /* Floating pill tab bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: calc(20px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: saturate(180%) blur(30px);
+            -webkit-backdrop-filter: saturate(180%) blur(30px);
+            border-radius: 32px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+            border: 0.5px solid rgba(255, 255, 255, 0.6);
+            gap: 4px;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--ios-gray);
+            font-size: 10px;
+            font-weight: 500;
+            min-width: 56px;
+            border-radius: 24px;
+            transition: all 0.2s;
+            gap: 2px;
+        }
+        .bottom-nav-item svg { width: 22px; height: 22px; }
+        .bottom-nav-item.active {
+            color: var(--brand-green);
+            background: var(--brand-green-bg);
+        }
+        .bottom-nav-item:active {
+            transform: scale(0.92);
+        }
+        
+        /* Welcome screen specific */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 24px;
+        }
+        .welcome-logo {
+            max-width: 200px;
+            margin-bottom: 32px;
+        }
+        .welcome-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .welcome-subtitle {
+            font-size: 17px;
+            color: var(--ios-tertiary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .welcome-form {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        /* Signature pad */
+        .signature-pad {
+            border-radius: 12px;
+            background: white;
+            cursor: crosshair;
+            width: 100%;
+            touch-action: none;
+            display: block;
+            box-shadow: inset 0 0 0 1px var(--ios-separator);
+        }
+        
+        /* Segmented control / Tabs */
+        .segmented-control {
+            background: var(--ios-gray5);
+            border-radius: 9px;
+            padding: 2px;
+            display: flex;
+            margin: 12px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .segmented-control::-webkit-scrollbar { display: none; }
+        .segment {
+            flex: 1;
+            min-width: max-content;
+            padding: 6px 12px;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ios-label);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .segment.active {
+            background: white;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        }
+        
+        /* Scanner area */
+        .scanner-area {
+            position: relative;
+            background: #000;
+            height: 360px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 16px 0;
         }
         #reader { width: 100%; height: 100%; }
-        #reader video { 
-            width: 100% !important; 
-            height: 100% !important; 
+        #reader video {
+            width: 100% !important;
+            height: 100% !important;
             object-fit: cover;
         }
-        .scanner-controls { 
-            position: absolute; 
-            top: 16px; 
-            right: 16px; 
-            display: flex; 
-            gap: 12px; 
+        .scanner-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 10px;
             z-index: 10;
         }
-        .control-btn { 
-            width: 48px; 
-            height: 48px; 
-            background: rgba(255,255,255,0.9); 
-            backdrop-filter: blur(10px); 
-            border: none; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             font-size: 20px;
+            color: var(--ios-label);
         }
-        .control-btn.active { 
-            background: var(--green); 
+        .control-btn.active {
+            background: var(--brand-green);
             color: white;
         }
-        
         .scan-notification {
             position: absolute;
             top: 80px;
             left: 16px;
             right: 16px;
             background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
             padding: 12px 16px;
-            border-radius: 10px;
-            border-left: 4px solid var(--green);
+            border-radius: 12px;
+            border-left: 4px solid var(--brand-green);
             display: none;
             z-index: 10;
+            font-weight: 600;
+            font-size: 15px;
         }
         
+        /* Stats */
         .stats-bar {
-            background: var(--surface);
-            padding: 16px;
+            background: var(--ios-card);
+            padding: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-            border-radius: 12px;
-            margin: 16px 0;
+            border-radius: 14px;
+            margin: 12px 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
-        .stat-box {
-            text-align: center;
-        }
+        .stat-box { text-align: center; }
         .stat-label {
             font-size: 12px;
-            color: var(--text-light);
+            color: var(--ios-tertiary);
             margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
         .stat-value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            color: var(--blue);
+            color: var(--brand-blue);
+            letter-spacing: -0.5px;
         }
         
-        .toast { 
-            position: fixed; 
-            bottom: 90px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: var(--green); 
-            color: white; 
-            padding: 14px 24px; 
-            border-radius: 12px; 
-            font-weight: 600; 
-            z-index: 9999; 
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: calc(110px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(40, 40, 40, 0.92);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 15px;
+            z-index: 9999;
             animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); } 
-            to { opacity: 1; transform: translateX(-50%) translateY(0); } 
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         @keyframes fadeOut { to { opacity: 0; } }
         
+        /* Empty state */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--text-light);
+            padding: 80px 20px;
+            color: var(--ios-tertiary);
         }
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: var(--ios-gray3);
+        }
+        .empty-state-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--ios-secondary);
+            margin-bottom: 4px;
+        }
+        .empty-state-message {
+            font-size: 15px;
+            color: var(--ios-tertiary);
+        }
+        
+        /* Links */
+        a { color: var(--brand-blue); text-decoration: none; }
+        
+        /* Misc helpers */
+        .row-flex { display: flex; gap: 10px; align-items: center; }
+        .mt-16 { margin-top: 16px; }
+        .mt-24 { margin-top: 24px; }
     </style>
 </head>
 <body>
+
     <!-- Tech Login Screen -->
     <div class="screen active" id="techLoginScreen">
-        <div class="header">
-            <div style="text-align: center;">
-                <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" style="max-width: 200px; margin-bottom: 16px;">
-                <h1>MBS TechTools</h1>
-                <p>Select your name to continue</p>
-            </div>
-        </div>
-        <div class="content" style="display: flex; align-items: center; justify-content: center; min-height: 50vh;">
-            <div style="max-width: 400px; width: 100%;">
-                <div class="form-group">
-                    <label>Search Your Name</label>
-                    <input type="text" id="techSearch" placeholder="Start typing..." oninput="filterTechs()" autocomplete="off">
+        <div class="welcome-screen">
+            <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" class="welcome-logo">
+            <h1 class="welcome-title">MBS TechTools</h1>
+            <p class="welcome-subtitle">Select your name to continue</p>
+            
+            <div class="welcome-form">
+                <div class="search-field">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 12a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-1.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm3.69-.94l3.7 3.7a1 1 0 0 1-1.42 1.42l-3.7-3.7a1 1 0 0 1 1.42-1.42z"/></svg>
+                    <input type="text" id="techSearch" placeholder="Search your name" oninput="filterTechs()" autocomplete="off">
                 </div>
-                <div class="search-results" id="techResults" style="display: none;"></div>
-                <button class="btn btn-outline" onclick="showScreen('adminLoginScreen')">Admin Login</button>
+                <div id="techResults" style="display: none;"></div>
+                
+                <div style="margin-top: 24px;">
+                    <button class="btn btn-plain" onclick="showScreen('adminLoginScreen')">Admin Login</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Tech Dashboard -->
     <div class="screen" id="techDashboard">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1>Welcome, <span id="techFirstName"></span></h1>
-                <p>MBS TechTools</p>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Today</div>
+                    <div class="ios-subtitle" id="dashDate"></div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
             </div>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
         </div>
         <div class="content">
-            <div class="welcome-card">
-                <h2 id="techFullName"></h2>
-                <p id="totalPending">0 pending tasks</p>
+            <div class="hero-card">
+                <div class="hero-greeting">Welcome back</div>
+                <div class="hero-name" id="techFullName"></div>
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-num" id="heroPending">0</div>
+                        <div class="hero-stat-label">Pending</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-num" id="heroCompleted">0</div>
+                        <div class="hero-stat-label">Completed today</div>
+                    </div>
+                </div>
             </div>
-            <div class="dashboard-grid" id="dashboardGrid"></div>
+            
+            <div class="section-header-large">Your Activity</div>
+            <div class="widget-grid" id="dashboardGrid"></div>
         </div>
     </div>
 
     <!-- Deliveries List -->
     <div class="screen" id="deliveriesScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Toner Deliveries</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Deliveries</div>
+                    <div class="ios-subtitle" id="deliveriesCount">0 pending</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content" id="deliveriesList"></div>
     </div>
 
     <!-- Delivery Detail -->
     <div class="screen" id="deliveryDetailScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Delivery Details</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="navTo('deliveriesScreen')">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Deliveries
+            </button>
+            <div class="nav-bar-title">Details</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content" id="deliveryDetailContent"></div>
     </div>
 
     <!-- Meters List -->
     <div class="screen" id="metersScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Meter Readings</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Meters</div>
+                    <div class="ios-subtitle" id="metersCount">0 pending</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content" id="metersList"></div>
     </div>
 
     <!-- Meter Entry -->
     <div class="screen" id="meterEntryScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Enter Meters</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="navTo('metersScreen')">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Meters
+            </button>
+            <div class="nav-bar-title">Enter Reading</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content" id="meterEntryContent"></div>
     </div>
 
     <!-- Transfers Screen -->
     <div class="screen" id="transfersScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Transfer Requests</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Transfers</div>
+                    <div class="ios-subtitle">Parts requests</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content">
             <button class="btn btn-primary" onclick="showTransferForm()">New Transfer Request</button>
@@ -432,42 +1055,59 @@
 
     <!-- Transfer Form -->
     <div class="screen" id="transferFormScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>New Transfer Request</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="cancelTransferForm()">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Cancel
+            </button>
+            <div class="nav-bar-title">New Transfer</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content">
             <form id="transferForm" onsubmit="submitTransfer(event)">
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="transferTechName" readonly>
+                <div class="section-header">Request Information</div>
+                <div class="floating-card">
+                    <div class="floating-field has-value">
+                        <input type="text" id="transferTechName" placeholder=" " readonly>
+                        <label class="floating-label">Your Name</label>
+                    </div>
+                    <div class="floating-field has-value">
+                        <select id="transferFrom" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
+                        <label class="floating-label">Transfer From</label>
+                    </div>
+                    <div class="floating-field has-value">
+                        <input type="date" id="transferDate" required placeholder=" ">
+                        <label class="floating-label">Date</label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Transfer From</label>
-                    <select id="transferFrom" required></select>
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="transferDate" required>
-                </div>
-                <h3 style="margin: 24px 0 12px;">Parts Needed</h3>
+                
+                <div class="section-header">Parts Needed</div>
                 <div id="transferItems"></div>
-                <button type="button" class="btn btn-outline" onclick="addTransferItem()">+ Add Part</button>
-                <div class="form-group" style="margin-top: 24px;">
-                    <label>Notes (Optional)</label>
-                    <textarea id="transferNotes" rows="3"></textarea>
+                <button type="button" class="btn btn-tinted" onclick="addTransferItem()">+ Add Part</button>
+                
+                <div class="section-header">Notes</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <textarea id="transferNotes" placeholder=" "></textarea>
+                        <label class="floating-label">Optional notes</label>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit Request</button>
-                <button type="button" class="btn btn-outline" onclick="cancelTransferForm()">Cancel</button>
+                
+                <button type="submit" class="btn btn-primary mt-16">Submit Request</button>
             </form>
         </div>
     </div>
 
     <!-- Returns Screen -->
     <div class="screen" id="returnsScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Toner Returns</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Returns</div>
+                    <div class="ios-subtitle">Toner returns</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content">
             <button class="btn btn-primary" onclick="showReturnForm()">Submit Toner Return</button>
@@ -477,80 +1117,102 @@
 
     <!-- Return Form -->
     <div class="screen" id="returnFormScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Submit Toner Return</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="cancelReturnForm()">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Cancel
+            </button>
+            <div class="nav-bar-title">New Return</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content">
             <form id="returnForm" onsubmit="submitReturn(event)">
-                <div class="form-group">
-                    <label>Tech Name</label>
-                    <input type="text" id="returnTechName" readonly>
+                <div class="section-header">Return Information</div>
+                <div class="floating-card">
+                    <div class="floating-field has-value">
+                        <input type="text" id="returnTechName" placeholder=" " readonly>
+                        <label class="floating-label">Tech Name</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="text" id="returnCustomer" placeholder=" " required>
+                        <label class="floating-label">Customer Name</label>
+                    </div>
+                    <div class="floating-field has-value">
+                        <input type="date" id="returnDate" required placeholder=" ">
+                        <label class="floating-label">Date</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="text" id="returnEquipmentId" placeholder=" " required>
+                        <label class="floating-label">Equipment ID</label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Customer Name</label>
-                    <input type="text" id="returnCustomer" required>
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="returnDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Equipment ID</label>
-                    <input type="text" id="returnEquipmentId" required>
-                </div>
-                <h3 style="margin: 24px 0 12px;">Items</h3>
+                
+                <div class="section-header">Items</div>
                 <div id="returnItems"></div>
-                <button type="button" class="btn btn-outline" onclick="addReturnItem()">+ Add Item</button>
-                <div class="form-group" style="margin-top: 24px;">
-                    <label>Notes (Optional)</label>
-                    <textarea id="returnNotes" rows="3"></textarea>
+                <button type="button" class="btn btn-tinted" onclick="addReturnItem()">+ Add Item</button>
+                
+                <div class="section-header">Notes</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <textarea id="returnNotes" placeholder=" "></textarea>
+                        <label class="floating-label">Optional notes</label>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit Return</button>
-                <button type="button" class="btn btn-outline" onclick="cancelReturnForm()">Cancel</button>
+                
+                <button type="submit" class="btn btn-primary mt-16">Submit Return</button>
             </form>
         </div>
     </div>
 
     <!-- Inventory View -->
     <div class="screen" id="inventoryScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Parts Inventory</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Inventory</div>
+                    <div class="ios-subtitle">Parts in your car</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content" id="inventoryList"></div>
     </div>
 
     <!-- Completed Tasks -->
     <div class="screen" id="completedScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Completed Tasks</h1>
-            <button class="btn btn-danger btn-small" onclick="techLogout()">Logout</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Completed</div>
+                    <div class="ios-subtitle">Last 7 days</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
+            </div>
         </div>
         <div class="content" id="completedList"></div>
     </div>
 
     <!-- Admin Login -->
     <div class="screen" id="adminLoginScreen">
-        <div class="header">
-            <div style="text-align: center;">
-                <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" style="max-width: 200px; margin-bottom: 16px;">
-                <h1>Admin Login</h1>
-            </div>
-        </div>
-        <div class="content" style="display: flex; align-items: center; justify-content: center; min-height: 50vh;">
-            <div style="max-width: 400px; width: 100%;">
+        <div class="welcome-screen">
+            <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" class="welcome-logo">
+            <h1 class="welcome-title">Admin Login</h1>
+            <p class="welcome-subtitle">Enter your credentials</p>
+            
+            <div class="welcome-form">
                 <form onsubmit="adminLogin(event)">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" id="adminUser" required>
+                    <div class="floating-card">
+                        <div class="floating-field">
+                            <input type="text" id="adminUser" placeholder=" " required autocapitalize="none" autocomplete="username">
+                            <label class="floating-label">Username</label>
+                        </div>
+                        <div class="floating-field">
+                            <input type="password" id="adminPass" placeholder=" " required autocomplete="current-password">
+                            <label class="floating-label">Password</label>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="adminPass" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <button type="button" class="btn btn-outline" onclick="showScreen('techLoginScreen')">Back</button>
+                    <button type="submit" class="btn btn-primary mt-16">Login</button>
+                    <button type="button" class="btn btn-plain" onclick="showScreen('techLoginScreen')">Back</button>
                 </form>
             </div>
         </div>
@@ -558,17 +1220,22 @@
 
     <!-- Admin Dashboard -->
     <div class="screen" id="adminDashboard">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div><h1>Admin Dashboard</h1></div>
-            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
-        </div>
-        <div class="tabs">
-            <button class="tab active" onclick="switchAdminTab('deliveries')">Deliveries</button>
-            <button class="tab" onclick="switchAdminTab('meters')">Meters</button>
-            <button class="tab" onclick="switchAdminTab('transfers')">Transfers</button>
-            <button class="tab" onclick="switchAdminTab('returns')">Returns</button>
-            <button class="tab" onclick="switchAdminTab('inventory')">Inventory</button>
-            <button class="tab" onclick="switchAdminTab('parts')">Parts</button>
+        <div class="ios-header">
+            <div class="ios-header-row">
+                <div>
+                    <div class="ios-title">Admin</div>
+                    <div class="ios-subtitle">Dashboard</div>
+                </div>
+                <button class="ios-header-button destructive" onclick="adminLogout()">Sign Out</button>
+            </div>
+            <div class="segmented-control" id="adminTabs">
+                <button class="segment active" onclick="switchAdminTab('deliveries', this)">Deliveries</button>
+                <button class="segment" onclick="switchAdminTab('meters', this)">Meters</button>
+                <button class="segment" onclick="switchAdminTab('transfers', this)">Transfers</button>
+                <button class="segment" onclick="switchAdminTab('returns', this)">Returns</button>
+                <button class="segment" onclick="switchAdminTab('inventory', this)">Inventory</button>
+                <button class="segment" onclick="switchAdminTab('parts', this)">Parts</button>
+            </div>
         </div>
         <div class="content">
             <div id="adminDeliveries"></div>
@@ -582,102 +1249,118 @@
 
     <!-- Admin Create Delivery Form -->
     <div class="screen" id="adminDeliveryFormScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Create Delivery Order</h1>
-            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="cancelAdminDeliveryForm()">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Cancel
+            </button>
+            <div class="nav-bar-title">New Delivery</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content">
             <form id="adminDeliveryForm" onsubmit="submitAdminDelivery(event)">
-                <div class="form-group">
-                    <label>Customer Name</label>
-                    <input type="text" id="deliveryCustomerName" required>
-                </div>
-                <div class="form-group">
-                    <label>Address (Optional)</label>
-                    <input type="text" id="deliveryAddress">
-                </div>
-                <div class="form-group">
-                    <label>Assign To Tech</label>
-                    <select id="deliveryAssignTo" required></select>
-                </div>
-                <div class="form-group">
-                    <label>PDF Link (Optional)</label>
-                    <input type="url" id="deliveryPdfUrl" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="deliveryUrgent" style="width: auto; margin-right: 8px;">
-                        Mark as URGENT
-                    </label>
+                <div class="section-header">Customer Information</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <input type="text" id="deliveryCustomerName" placeholder=" " required>
+                        <label class="floating-label">Customer Name</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="text" id="deliveryAddress" placeholder=" ">
+                        <label class="floating-label">Address (Optional)</label>
+                    </div>
+                    <div class="floating-field has-value">
+                        <select id="deliveryAssignTo" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
+                        <label class="floating-label">Assign To Tech</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="url" id="deliveryPdfUrl" placeholder=" ">
+                        <label class="floating-label">PDF Link (Optional)</label>
+                    </div>
                 </div>
                 
-                <h3 style="margin: 24px 0 12px;">Items to Deliver</h3>
+                <div class="section-header">Options</div>
+                <div class="floating-card">
+                    <div class="floating-checkbox-row">
+                        <label for="deliveryUrgent">Mark as URGENT</label>
+                        <input type="checkbox" id="deliveryUrgent" class="ios-switch">
+                    </div>
+                </div>
+                
+                <div class="section-header">Items to Deliver</div>
                 <div id="deliveryItems"></div>
-                <button type="button" class="btn btn-outline" onclick="addDeliveryItem()">+ Add Item</button>
+                <button type="button" class="btn btn-tinted" onclick="addDeliveryItem()">+ Add Item</button>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Create Delivery Order</button>
-                <button type="button" class="btn btn-outline" onclick="cancelAdminDeliveryForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary mt-24">Create Delivery Order</button>
             </form>
         </div>
     </div>
 
     <!-- Admin Create Meter Form -->
     <div class="screen" id="adminMeterFormScreen">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Create Meter Request</h1>
-            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        <div class="nav-bar">
+            <button class="nav-back" onclick="cancelAdminMeterForm()">
+                <svg viewBox="0 0 12 20" fill="currentColor"><path d="M10 0L0 10l10 10 2-2-8-8 8-8z"/></svg>
+                Cancel
+            </button>
+            <div class="nav-bar-title">New Meter Request</div>
+            <div style="width: 60px;"></div>
         </div>
         <div class="content">
             <form id="adminMeterForm" onsubmit="submitAdminMeter(event)">
-                <div class="form-group">
-                    <label>Customer Name</label>
-                    <input type="text" id="meterCustomerName" required>
-                </div>
-                <div class="form-group">
-                    <label>Address (Optional)</label>
-                    <input type="text" id="meterAddress">
-                </div>
-                <div class="form-group">
-                    <label>Assign To Tech</label>
-                    <select id="meterAssignTo" required></select>
-                </div>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="meterUrgent" style="width: auto; margin-right: 8px;">
-                        Mark as URGENT
-                    </label>
+                <div class="section-header">Customer Information</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <input type="text" id="meterCustomerName" placeholder=" " required>
+                        <label class="floating-label">Customer Name</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="text" id="meterAddress" placeholder=" ">
+                        <label class="floating-label">Address (Optional)</label>
+                    </div>
+                    <div class="floating-field has-value">
+                        <select id="meterAssignTo" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
+                        <label class="floating-label">Assign To Tech</label>
+                    </div>
                 </div>
                 
-                <h3 style="margin: 24px 0 12px;">Equipment</h3>
+                <div class="section-header">Options</div>
+                <div class="floating-card">
+                    <div class="floating-checkbox-row">
+                        <label for="meterUrgent">Mark as URGENT</label>
+                        <input type="checkbox" id="meterUrgent" class="ios-switch">
+                    </div>
+                </div>
+                
+                <div class="section-header">Equipment</div>
                 <div id="meterEquipment"></div>
-                <button type="button" class="btn btn-outline" onclick="addMeterEquipment()">+ Add Equipment</button>
+                <button type="button" class="btn btn-tinted" onclick="addMeterEquipment()">+ Add Equipment</button>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 24px;">Create Meter Request</button>
-                <button type="button" class="btn btn-outline" onclick="cancelAdminMeterForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary mt-24">Create Meter Request</button>
             </form>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Floating Pill Bottom Navigation -->
     <div class="bottom-nav" id="bottomNav" style="display: none;">
-        <div class="bottom-nav-item" onclick="navTo('techDashboard')">
-            <div class="icon">🏠</div>
+        <div class="bottom-nav-item active" data-screen="techDashboard" onclick="navTo('techDashboard')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 7v11h-6v-7H9v7H3V10l9-7z"/></svg>
             <div>Home</div>
         </div>
-        <div class="bottom-nav-item" onclick="navTo('deliveriesScreen')">
-            <div class="icon">📦</div>
+        <div class="bottom-nav-item" data-screen="deliveriesScreen" onclick="navTo('deliveriesScreen')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm12 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-1.5-7V9.5h2.5L21 12h-4.5z"/></svg>
             <div>Deliveries</div>
         </div>
-        <div class="bottom-nav-item" onclick="navTo('metersScreen')">
-            <div class="icon">📊</div>
+        <div class="bottom-nav-item" data-screen="metersScreen" onclick="navTo('metersScreen')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
             <div>Meters</div>
         </div>
-        <div class="bottom-nav-item" onclick="navTo('transfersScreen')">
-            <div class="icon">🔄</div>
+        <div class="bottom-nav-item" data-screen="transfersScreen" onclick="navTo('transfersScreen')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
             <div>Transfers</div>
         </div>
-        <div class="bottom-nav-item" onclick="navTo('returnsScreen')">
-            <div class="icon">↩️</div>
+        <div class="bottom-nav-item" data-screen="returnsScreen" onclick="navTo('returnsScreen')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H6.83l3.58-3.59L9 3 3 9l6 6 1.41-1.41L6.83 10H19v8H5v2h14c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"/></svg>
             <div>Returns</div>
         </div>
     </div>
@@ -744,13 +1427,16 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
+            window.scrollTo(0, 0);
             
-            if (id !== 'techLoginScreen' && id !== 'adminLoginScreen' && id !== 'adminDashboard') {
-                document.getElementById('bottomNav').style.display = 'flex';
-            } else {
-                document.getElementById('bottomNav').style.display = 'none';
-            }
+            const techScreens = ['techDashboard', 'deliveriesScreen', 'metersScreen', 'transfersScreen', 'returnsScreen', 'inventoryScreen', 'completedScreen', 'deliveryDetailScreen', 'meterEntryScreen', 'transferFormScreen', 'returnFormScreen'];
+            const showNav = techScreens.includes(id) && currentTech !== null;
+            document.getElementById('bottomNav').style.display = showNav ? 'flex' : 'none';
+            
+            // Update active nav item
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.screen === id);
+            });
         }
         
         function navTo(screen) {
@@ -769,28 +1455,35 @@
             const search = document.getElementById('techSearch').value.toLowerCase();
             const results = document.getElementById('techResults');
             
-            if (!search) { 
-                results.style.display = 'none'; 
-                return; 
+            if (!search) {
+                results.style.display = 'none';
+                return;
             }
             
-            const filtered = TECHS.filter(t => 
-                t.first.toLowerCase().includes(search) || 
+            const filtered = TECHS.filter(t =>
+                t.first.toLowerCase().includes(search) ||
                 t.full.toLowerCase().includes(search) ||
                 (t.alias && t.alias.toLowerCase().includes(search))
             );
             
-            if (filtered.length === 0) { 
-                results.style.display = 'none'; 
-                return; 
+            if (filtered.length === 0) {
+                results.style.display = 'none';
+                return;
             }
             
-            results.innerHTML = filtered.map(t => `
-                <div class="search-result" onclick="selectTech('${t.full}')">
-                    <strong>${t.full}</strong>
-                    ${t.alias ? `<span style="color: var(--text-light); margin-left: 8px;">(${t.alias})</span>` : ''}
-                </div>
-            `).join('');
+            results.innerHTML = '<div class="search-results">' + filtered.map(t => {
+                const initials = t.full.split(' ').map(n => n[0]).join('');
+                return `
+                    <div class="search-result" onclick="selectTech('${t.full}')">
+                        <div class="search-result-avatar">${initials}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 17px;">${t.full}</div>
+                            ${t.alias ? `<div style="font-size: 13px; color: var(--ios-tertiary);">${t.alias}</div>` : ''}
+                        </div>
+                        <svg width="8" height="14" viewBox="0 0 8 14" fill="var(--ios-gray3)"><path d="M1 1l6 6-6 6"/></svg>
+                    </div>
+                `;
+            }).join('') + '</div>';
             results.style.display = 'block';
         }
         
@@ -798,14 +1491,14 @@
             currentTech = TECHS.find(t => t.full === fullName);
             if (!currentTech) return;
             
-            document.getElementById('techFirstName').textContent = currentTech.first;
             document.getElementById('techFullName').textContent = currentTech.full;
+            document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
             loadTechDashboard();
             showScreen('techDashboard');
         }
         
         function techLogout() {
-            if (confirm('Are you sure you want to logout?')) {
+            if (confirm('Are you sure you want to sign out?')) {
                 currentTech = null;
                 document.getElementById('techSearch').value = '';
                 document.getElementById('techResults').style.display = 'none';
@@ -822,32 +1515,65 @@
             const myInventory = inventory.filter(inv => inv.techName === currentTech.full).length;
             
             const total = myDeliveries + myMeters + myTransfers + myReturns;
-            document.getElementById('totalPending').textContent = `${total} pending task${total !== 1 ? 's' : ''}`;
+            
+            // Today's completed
+            const today = new Date().toDateString();
+            const completedToday = [
+                ...deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'delivered' && new Date(d.deliveredAt).toDateString() === today),
+                ...meters.filter(m => m.assignedTo === currentTech.full && m.status === 'completed' && new Date(m.completedAt).toDateString() === today)
+            ].length;
+            
+            document.getElementById('heroPending').textContent = total;
+            document.getElementById('heroCompleted').textContent = completedToday;
             
             document.getElementById('dashboardGrid').innerHTML = `
-                <div class="dashboard-card" onclick="navTo('deliveriesScreen')">
-                    <div><h3>Deliveries</h3><p>Toner deliveries</p></div>
-                    <div class="count">${myDeliveries}</div>
+                <div class="widget" onclick="navTo('deliveriesScreen')">
+                    <div class="widget-icon-wrap widget-icon-green">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm12 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-1.5-7V9.5h2.5L21 12h-4.5z"/></svg>
+                    </div>
+                    <div class="widget-title">Deliveries</div>
+                    <div class="widget-subtitle">Toner deliveries</div>
+                    <div class="widget-count widget-count-green">${myDeliveries}</div>
                 </div>
-                <div class="dashboard-card" onclick="navTo('metersScreen')">
-                    <div><h3>Meters</h3><p>Readings needed</p></div>
-                    <div class="count">${myMeters}</div>
+                <div class="widget" onclick="navTo('metersScreen')">
+                    <div class="widget-icon-wrap widget-icon-blue">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    </div>
+                    <div class="widget-title">Meters</div>
+                    <div class="widget-subtitle">Readings needed</div>
+                    <div class="widget-count widget-count-blue">${myMeters}</div>
                 </div>
-                <div class="dashboard-card" onclick="navTo('transfersScreen')">
-                    <div><h3>Transfers</h3><p>Parts requests</p></div>
-                    <div class="count">${myTransfers}</div>
+                <div class="widget" onclick="navTo('transfersScreen')">
+                    <div class="widget-icon-wrap widget-icon-orange">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                    </div>
+                    <div class="widget-title">Transfers</div>
+                    <div class="widget-subtitle">Parts requests</div>
+                    <div class="widget-count widget-count-orange">${myTransfers}</div>
                 </div>
-                <div class="dashboard-card" onclick="navTo('returnsScreen')">
-                    <div><h3>Returns</h3><p>Toner returns</p></div>
-                    <div class="count">${myReturns}</div>
+                <div class="widget" onclick="navTo('returnsScreen')">
+                    <div class="widget-icon-wrap widget-icon-pink">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H6.83l3.58-3.59L9 3 3 9l6 6 1.41-1.41L6.83 10H19v8H5v2h14c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"/></svg>
+                    </div>
+                    <div class="widget-title">Returns</div>
+                    <div class="widget-subtitle">Toner returns</div>
+                    <div class="widget-count widget-count-pink">${myReturns}</div>
                 </div>
-                <div class="dashboard-card" onclick="navTo('inventoryScreen')">
-                    <div><h3>Inventory</h3><p>View results</p></div>
-                    <div class="count">${myInventory}</div>
+                <div class="widget" onclick="navTo('inventoryScreen')">
+                    <div class="widget-icon-wrap widget-icon-purple">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    </div>
+                    <div class="widget-title">Inventory</div>
+                    <div class="widget-subtitle">View scans</div>
+                    <div class="widget-count widget-count-purple">${myInventory}</div>
                 </div>
-                <div class="dashboard-card" onclick="navTo('completedScreen')">
-                    <div><h3>Completed</h3><p>Last 7 days</p></div>
-                    <div class="count">✓</div>
+                <div class="widget" onclick="navTo('completedScreen')">
+                    <div class="widget-icon-wrap widget-icon-gray">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="widget-title">Completed</div>
+                    <div class="widget-subtitle">Last 7 days</div>
+                    <div class="widget-count widget-count-gray">→</div>
                 </div>
             `;
         }
@@ -855,10 +1581,16 @@
         // Deliveries
         function loadDeliveries() {
             const mine = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending');
+            document.getElementById('deliveriesCount').textContent = `${mine.length} pending`;
             const list = document.getElementById('deliveriesList');
             
             if (mine.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No pending deliveries</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"/></svg>
+                        <div class="empty-state-title">All caught up</div>
+                        <div class="empty-state-message">No pending deliveries</div>
+                    </div>`;
             } else {
                 list.innerHTML = mine.map(d => `
                     <div class="card ${d.urgent ? 'urgent' : ''} clickable" onclick="openDelivery(${d.id})">
@@ -867,7 +1599,7 @@
                             ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
                         </div>
                         <div class="card-meta">${d.address || 'No address'}</div>
-                        <div class="card-meta">${d.items.length} items</div>
+                        <div class="card-meta">${d.items.length} item${d.items.length !== 1 ? 's' : ''}</div>
                     </div>
                 `).join('');
             }
@@ -882,36 +1614,38 @@
                 <div class="card">
                     <div class="card-title">${delivery.customerName}</div>
                     <div class="card-meta">${delivery.address || 'No address'}</div>
-                    ${delivery.pdfUrl ? `<a href="${delivery.pdfUrl}" target="_blank" style="color: var(--blue); text-decoration: underline; display: block; margin-top: 8px;">View PDF</a>` : ''}
+                    ${delivery.pdfUrl ? `<a href="${delivery.pdfUrl}" target="_blank" style="display: block; margin-top: 12px; font-weight: 500;">View PDF →</a>` : ''}
                 </div>
                 
-                <h3 style="margin: 20px 0 12px;">Items</h3>
+                <div class="section-header-large" style="font-size: 17px; padding: 20px 0 8px;">Items</div>
                 ${delivery.items.map(item => `
                     <div class="card">
-                        <strong>${item.itemNumber}</strong>
+                        <strong style="font-size: 16px;">${item.itemNumber}</strong>
                         <div class="card-meta">Quantity: ${item.quantity}</div>
                         <div class="card-meta">Equipment: ${item.equipmentId}</div>
                         ${item.model ? `<div class="card-meta">Model: ${item.model}</div>` : ''}
                     </div>
                 `).join('')}
                 
-                <div style="margin: 24px 0;">
-                    <h3 style="margin-bottom: 12px;">Customer Signature</h3>
+                <div class="section-header-large" style="font-size: 17px; padding: 20px 0 8px;">Customer Signature</div>
+                <div style="background: white; border-radius: 14px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
                     <canvas id="signaturePad" class="signature-pad" width="400" height="200"></canvas>
-                    <button class="btn btn-outline btn-small" onclick="clearSignature()" style="margin-top: 8px;">Clear</button>
+                    <button class="btn btn-plain" style="margin: 8px 0 0 0; padding: 8px 0; text-align: left;" onclick="clearSignature()">Clear signature</button>
                 </div>
                 
-                <div class="form-group">
-                    <label>Customer Name (Print)</label>
-                    <input type="text" id="customerPrintName" required>
+                <div class="section-header">Confirmation</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <input type="text" id="customerPrintName" placeholder=" " required>
+                        <label class="floating-label">Customer Name (Print)</label>
+                    </div>
+                    <div class="floating-field">
+                        <textarea id="deliveryNotes" placeholder=" "></textarea>
+                        <label class="floating-label">Delivery Notes (Optional)</label>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Delivery Notes (Optional)</label>
-                    <textarea id="deliveryNotes" rows="3"></textarea>
-                </div>
-                
-                <button class="btn btn-primary" onclick="completeDelivery(${id})">Mark as Delivered</button>
+                <button class="btn btn-primary mt-16" onclick="completeDelivery(${id})">Mark as Delivered</button>
             `;
             
             initSignaturePad();
@@ -931,27 +1665,21 @@
                 signatureCtx.beginPath();
                 signatureCtx.moveTo(x, y);
             }
-            
             function draw(x, y) {
                 if (!isDrawing) return;
                 signatureCtx.lineTo(x, y);
                 signatureCtx.stroke();
             }
-            
-            function stopDrawing() {
-                isDrawing = false;
-            }
+            function stopDrawing() { isDrawing = false; }
             
             signatureCanvas.addEventListener('mousedown', (e) => {
                 const rect = signatureCanvas.getBoundingClientRect();
                 startDrawing(e.clientX - rect.left, e.clientY - rect.top);
             });
-            
             signatureCanvas.addEventListener('mousemove', (e) => {
                 const rect = signatureCanvas.getBoundingClientRect();
                 draw(e.clientX - rect.left, e.clientY - rect.top);
             });
-            
             signatureCanvas.addEventListener('mouseup', stopDrawing);
             signatureCanvas.addEventListener('mouseleave', stopDrawing);
             
@@ -961,14 +1689,12 @@
                 const touch = e.touches[0];
                 startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
             });
-            
             signatureCanvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 const rect = signatureCanvas.getBoundingClientRect();
                 const touch = e.touches[0];
                 draw(touch.clientX - rect.left, touch.clientY - rect.top);
             });
-            
             signatureCanvas.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 stopDrawing();
@@ -992,9 +1718,7 @@
                 showToast('Customer printed name required');
                 return;
             }
-            
             const signatureData = signatureCanvas.toDataURL();
-            
             const idx = deliveries.findIndex(d => d.id === id);
             if (idx !== -1) {
                 deliveries[idx].status = 'delivered';
@@ -1012,10 +1736,16 @@
         // Meters
         function loadMeters() {
             const mine = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending');
+            document.getElementById('metersCount').textContent = `${mine.length} pending`;
             const list = document.getElementById('metersList');
             
             if (mine.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No pending meter readings</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        <div class="empty-state-title">All caught up</div>
+                        <div class="empty-state-message">No pending meter readings</div>
+                    </div>`;
             } else {
                 list.innerHTML = mine.map(m => `
                     <div class="card ${m.urgent ? 'urgent' : ''} clickable" onclick="openMeterEntry(${m.id})">
@@ -1043,37 +1773,32 @@
                 
                 <form id="meterForm" onsubmit="submitMeters(event, ${id})">
                     ${meter.equipment.map((eq, idx) => `
-                        <div class="card">
-                            <div class="card-title">${eq.model || 'Equipment'}</div>
-                            <div class="card-meta">Equipment ID: ${eq.equipmentId}</div>
-                            
+                        <div class="section-header">${eq.model || 'Equipment'} · ${eq.equipmentId}</div>
+                        <div class="floating-card">
                             ${eq.meterType === 'Black' || eq.meterType === 'Both' ? `
-                                <div class="form-group">
-                                    <label>Black Count</label>
-                                    <input type="number" name="bw_${idx}" min="0" required>
+                                <div class="floating-field">
+                                    <input type="number" name="bw_${idx}" placeholder=" " min="0" required>
+                                    <label class="floating-label">Black Count</label>
                                 </div>
                             ` : ''}
-                            
                             ${eq.meterType === 'Color' || eq.meterType === 'Both' ? `
-                                <div class="form-group">
-                                    <label>Color Count</label>
-                                    <input type="number" name="color_${idx}" min="0" required>
+                                <div class="floating-field">
+                                    <input type="number" name="color_${idx}" placeholder=" " min="0" required>
+                                    <label class="floating-label">Color Count</label>
                                 </div>
                             ` : ''}
                         </div>
                     `).join('')}
                     
-                    <button type="submit" class="btn btn-primary">Submit Readings</button>
+                    <button type="submit" class="btn btn-primary mt-16">Submit Readings</button>
                 </form>
             `;
-            
             showScreen('meterEntryScreen');
         }
         
         function submitMeters(e, id) {
             e.preventDefault();
             const formData = new FormData(e.target);
-            
             const idx = meters.findIndex(m => m.id === id);
             if (idx !== -1) {
                 meters[idx].equipment.forEach((eq, i) => {
@@ -1089,15 +1814,15 @@
             }
         }
         
-        // Transfers (already implemented)
+        // Transfers
         let transferItemCounter = 0;
-        
         function showTransferForm() {
             document.getElementById('transferTechName').value = currentTech.full;
             document.getElementById('transferItems').innerHTML = '';
             document.getElementById('transferNotes').value = '';
             document.getElementById('transferDate').valueAsDate = new Date();
             document.getElementById('transferFrom').value = '';
+            document.getElementById('transferFrom').parentElement.classList.remove('has-value');
             addTransferItem();
             showScreen('transferFormScreen');
         }
@@ -1109,16 +1834,16 @@
             item.className = 'line-item';
             item.innerHTML = `
                 <div class="line-item-header">
-                    <strong>Part ${container.children.length + 1}</strong>
-                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                    <span>Part ${container.children.length + 1}</span>
+                    <button type="button" class="line-item-remove" onclick="this.closest('.line-item').remove()">Remove</button>
                 </div>
-                <div class="form-group">
-                    <label>Part Number</label>
-                    <input type="text" name="partNum_${id}" required>
+                <div class="floating-field">
+                    <input type="text" name="partNum_${id}" placeholder=" " required>
+                    <label class="floating-label">Part Number</label>
                 </div>
-                <div class="form-group">
-                    <label>Quantity</label>
+                <div class="floating-field has-value">
                     <input type="number" name="qty_${id}" value="1" min="1" required>
+                    <label class="floating-label">Quantity</label>
                 </div>
             `;
             container.appendChild(item);
@@ -1126,7 +1851,6 @@
         
         function submitTransfer(e) {
             e.preventDefault();
-            
             const transfer = {
                 id: Date.now(),
                 techName: currentTech.full,
@@ -1137,7 +1861,6 @@
                 status: 'pending',
                 submittedAt: new Date().toISOString()
             };
-            
             document.querySelectorAll('#transferItems .line-item').forEach(item => {
                 const inputs = item.querySelectorAll('input');
                 transfer.items.push({
@@ -1145,7 +1868,6 @@
                     quantity: inputs[1].value
                 });
             });
-            
             transfers.unshift(transfer);
             localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
             showToast('Transfer request submitted');
@@ -1153,16 +1875,18 @@
             navTo('transfersScreen');
         }
         
-        function cancelTransferForm() {
-            navTo('transfersScreen');
-        }
+        function cancelTransferForm() { navTo('transfersScreen'); }
         
         function loadTransfers() {
             const mine = transfers.filter(t => t.techName === currentTech.full);
             const list = document.getElementById('transfersList');
-            
             if (mine.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No transfer requests</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                        <div class="empty-state-title">No transfer requests</div>
+                        <div class="empty-state-message">Tap "New Transfer Request" to create one</div>
+                    </div>`;
             } else {
                 list.innerHTML = mine.map(t => `
                     <div class="card">
@@ -1171,12 +1895,10 @@
                             <span class="badge badge-${t.status}">${t.status.toUpperCase()}</span>
                         </div>
                         <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
-                        <div class="card-meta">${t.items.length} parts</div>
+                        <div class="card-meta">${t.items.length} part${t.items.length !== 1 ? 's' : ''}</div>
                         ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">${t.notes}</div>` : ''}
                         ${t.status === 'pending' ? `
-                            <div style="margin-top: 12px;">
-                                <button class="btn btn-danger btn-small" onclick="deleteTransfer(${t.id})">Cancel</button>
-                            </div>
+                            <button class="btn btn-small btn-danger" style="margin-top: 12px;" onclick="deleteTransfer(${t.id})">Cancel</button>
                         ` : ''}
                     </div>
                 `).join('');
@@ -1192,9 +1914,8 @@
             }
         }
         
-        // Returns (already implemented)
+        // Returns
         let returnItemCounter = 0;
-        
         function showReturnForm() {
             document.getElementById('returnTechName').value = currentTech.full;
             document.getElementById('returnCustomer').value = '';
@@ -1213,29 +1934,29 @@
             item.className = 'line-item';
             item.innerHTML = `
                 <div class="line-item-header">
-                    <strong>Item ${container.children.length + 1}</strong>
-                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                    <span>Item ${container.children.length + 1}</span>
+                    <button type="button" class="line-item-remove" onclick="this.closest('.line-item').remove()">Remove</button>
                 </div>
-                <div class="form-group">
-                    <label>Item Number</label>
-                    <input type="text" name="itemNum_${id}" required>
+                <div class="floating-field">
+                    <input type="text" name="itemNum_${id}" placeholder=" " required>
+                    <label class="floating-label">Item Number</label>
                 </div>
-                <div class="form-group">
-                    <label>Quantity</label>
+                <div class="floating-field has-value">
                     <input type="number" name="itemQty_${id}" value="1" min="1" required>
+                    <label class="floating-label">Quantity</label>
                 </div>
-                <div class="form-group">
-                    <label>Condition</label>
+                <div class="floating-field has-value">
                     <select name="condition_${id}" required>
                         <option value="Used">Used</option>
                         <option value="Empty">Empty</option>
                         <option value="Damaged">Damaged</option>
                         <option value="Full">Full</option>
                     </select>
+                    <label class="floating-label">Condition</label>
                 </div>
-                <div class="form-group">
-                    <label>Photo (Optional)</label>
-                    <input type="file" name="photo_${id}" accept="image/*" capture="environment">
+                <div class="floating-field has-value">
+                    <input type="file" name="photo_${id}" accept="image/*" capture="environment" style="padding-top: 22px;">
+                    <label class="floating-label">Photo (Optional)</label>
                 </div>
             `;
             container.appendChild(item);
@@ -1243,7 +1964,6 @@
         
         function submitReturn(e) {
             e.preventDefault();
-            
             const returnObj = {
                 id: Date.now(),
                 techName: currentTech.full,
@@ -1255,7 +1975,6 @@
                 status: 'pending',
                 submittedAt: new Date().toISOString()
             };
-            
             document.querySelectorAll('#returnItems .line-item').forEach(item => {
                 const inputs = item.querySelectorAll('input, select');
                 returnObj.items.push({
@@ -1264,7 +1983,6 @@
                     condition: inputs[2].value
                 });
             });
-            
             returns.unshift(returnObj);
             localStorage.setItem('mbs_returns', JSON.stringify(returns));
             showToast('Toner return submitted');
@@ -1272,16 +1990,18 @@
             navTo('returnsScreen');
         }
         
-        function cancelReturnForm() {
-            navTo('returnsScreen');
-        }
+        function cancelReturnForm() { navTo('returnsScreen'); }
         
         function loadReturns() {
             const mine = returns.filter(r => r.techName === currentTech.full);
             const list = document.getElementById('returnsList');
-            
             if (mine.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No toner returns</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H6.83l3.58-3.59L9 3 3 9l6 6 1.41-1.41L6.83 10H19v8H5v2h14c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"/></svg>
+                        <div class="empty-state-title">No returns</div>
+                        <div class="empty-state-message">Tap "Submit Toner Return" to create one</div>
+                    </div>`;
             } else {
                 list.innerHTML = mine.map(r => `
                     <div class="card">
@@ -1291,26 +2011,29 @@
                         </div>
                         <div class="card-meta">Equipment ID: ${r.equipmentId}</div>
                         <div class="card-meta">${new Date(r.date).toLocaleDateString()}</div>
-                        <div class="card-meta">${r.items.length} items</div>
+                        <div class="card-meta">${r.items.length} item${r.items.length !== 1 ? 's' : ''}</div>
                     </div>
                 `).join('');
             }
         }
         
-        // Inventory View (Tech - Read Only)
+        // Inventory View
         function loadInventoryView() {
             const myInventory = inventory.filter(inv => inv.techName === currentTech.full);
             const list = document.getElementById('inventoryList');
-            
             if (myInventory.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No inventory scanned yet</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+                        <div class="empty-state-title">No inventory</div>
+                        <div class="empty-state-message">Inventory scans will appear here</div>
+                    </div>`;
             } else {
                 list.innerHTML = myInventory.map(inv => `
-                    <div class="card">
+                    <div class="card clickable" onclick="viewInventoryDetails(${inventory.indexOf(inv)})">
                         <div class="card-title">Inventory Scan</div>
                         <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
-                        <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
-                        <button class="btn btn-secondary btn-small" style="margin-top: 12px;" onclick="viewInventoryDetails(${inventory.indexOf(inv)})">View Details</button>
+                        <div class="card-meta">${Object.keys(inv.items).length} unique parts · ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total</div>
                     </div>
                 `).join('');
             }
@@ -1319,18 +2042,17 @@
         function viewInventoryDetails(idx) {
             const inv = inventory[idx];
             const list = document.getElementById('inventoryList');
-            
             list.innerHTML = `
-                <button class="btn btn-outline btn-small" onclick="loadInventoryView()">← Back</button>
+                <button class="btn btn-tinted btn-small" onclick="loadInventoryView()" style="margin-bottom: 12px;">← Back</button>
                 <div class="card">
                     <div class="card-title">Inventory Scan</div>
                     <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
                     <div class="card-meta">Scanned: ${new Date(inv.timestamp).toLocaleString()}</div>
                 </div>
-                <h3 style="margin: 20px 0 12px;">Parts in Your Car</h3>
+                <div class="section-header">Parts in your car</div>
                 ${Object.entries(inv.items).sort((a,b) => b[1] - a[1]).map(([code, count]) => `
                     <div class="card">
-                        <strong style="font-family: 'Courier New', monospace;">${code}</strong>
+                        <strong style="font-family: 'SF Mono', monospace; font-size: 15px;">${code}</strong>
                         <div class="card-meta">Quantity: ${count}</div>
                     </div>
                 `).join('')}
@@ -1348,9 +2070,13 @@
             ].sort((a,b) => new Date(b.date) - new Date(a.date));
             
             const list = document.getElementById('completedList');
-            
             if (completed.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No completed tasks in the last 7 days</p></div>';
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <div class="empty-state-title">No completed tasks</div>
+                        <div class="empty-state-message">Completed tasks from the last 7 days appear here</div>
+                    </div>`;
             } else {
                 list.innerHTML = completed.map(item => `
                     <div class="card">
@@ -1365,12 +2091,11 @@
             }
         }
         
-        // Admin Login
+        // Admin
         function adminLogin(e) {
             e.preventDefault();
             const user = document.getElementById('adminUser').value;
             const pass = document.getElementById('adminPass').value;
-            
             if (user === 'admin' && pass === 'mbs2024') {
                 loadAdminDashboard();
                 showScreen('adminDashboard');
@@ -1379,21 +2104,16 @@
             }
         }
         
-        function adminLogout() {
-            showScreen('techLoginScreen');
-        }
+        function adminLogout() { showScreen('techLoginScreen'); }
         
-        function switchAdminTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
+        function switchAdminTab(tab, btnEl) {
+            document.querySelectorAll('#adminTabs .segment').forEach(t => t.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
             ['adminDeliveries', 'adminMeters', 'adminTransfers', 'adminReturns', 'adminInventory', 'adminParts'].forEach(id => {
                 document.getElementById(id).style.display = 'none';
             });
-            
             const tabId = 'admin' + tab.charAt(0).toUpperCase() + tab.slice(1);
             document.getElementById(tabId).style.display = 'block';
-            
             if (tab === 'deliveries') loadAdminDeliveries();
             if (tab === 'meters') loadAdminMeters();
             if (tab === 'transfers') loadAdminTransfers();
@@ -1402,9 +2122,7 @@
             if (tab === 'parts') loadAdminParts();
         }
         
-        function loadAdminDashboard() {
-            loadAdminDeliveries();
-        }
+        function loadAdminDashboard() { loadAdminDeliveries(); }
         
         // Admin Deliveries
         let deliveryItemCounter = 0;
@@ -1413,27 +2131,26 @@
         function loadAdminDeliveries() {
             const pending = deliveries.filter(d => d.status === 'pending');
             const completed = deliveries.filter(d => d.status === 'delivered');
-            
             const el = document.getElementById('adminDeliveries');
             el.innerHTML = `
                 <button class="btn btn-primary" onclick="showAdminDeliveryForm()">Create Delivery Order</button>
                 
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending deliveries</p></div>' : pending.map(d => `
+                <div class="section-header">Pending (${pending.length})</div>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No pending deliveries</p></div>' : pending.map(d => `
                     <div class="card">
                         <div class="card-title">
                             ${d.customerName} → ${d.assignedTo}
                             ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
                         </div>
                         <div class="card-meta">${d.address || 'No address'}</div>
-                        <div class="card-meta">${d.items.length} items</div>
-                        <button class="btn btn-danger btn-small" style="margin-top: 8px;" onclick="deleteDelivery(${d.id})">Delete</button>
+                        <div class="card-meta">${d.items.length} item${d.items.length !== 1 ? 's' : ''}</div>
+                        <button class="btn btn-small btn-danger" style="margin-top: 12px;" onclick="deleteDelivery(${d.id})">Delete</button>
                     </div>
                 `).join('')}
                 
-                <h3 style="margin: 20px 0 12px;">Delivered (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportDeliveries()">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed deliveries</p></div>' : completed.map(d => `
+                <div class="section-header">Delivered (${completed.length})</div>
+                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportDeliveries()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No completed deliveries</p></div>' : completed.map(d => `
                     <div class="card">
                         <div class="card-title">${d.customerName} → ${d.assignedTo}</div>
                         <div class="card-meta">Delivered ${new Date(d.deliveredAt).toLocaleDateString()}</div>
@@ -1444,22 +2161,17 @@
         }
         
         function showAdminDeliveryForm() {
-            // Populate tech dropdown
             const select = document.getElementById('deliveryAssignTo');
             select.innerHTML = '<option value="">Select tech...</option>' + 
                 TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
-            
-            // Reset form
+            select.parentElement.classList.remove('has-value');
             document.getElementById('deliveryCustomerName').value = '';
             document.getElementById('deliveryAddress').value = '';
             document.getElementById('deliveryPdfUrl').value = '';
             document.getElementById('deliveryUrgent').checked = false;
             document.getElementById('deliveryItems').innerHTML = '';
             deliveryItemCounter = 0;
-            
-            // Add first item
             addDeliveryItem();
-            
             showScreen('adminDeliveryFormScreen');
         }
         
@@ -1470,24 +2182,24 @@
             item.className = 'line-item';
             item.innerHTML = `
                 <div class="line-item-header">
-                    <strong>Item ${container.children.length + 1}</strong>
-                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                    <span>Item ${container.children.length + 1}</span>
+                    <button type="button" class="line-item-remove" onclick="this.closest('.line-item').remove()">Remove</button>
                 </div>
-                <div class="form-group">
-                    <label>Item Number</label>
-                    <input type="text" name="itemNum_${id}" required>
+                <div class="floating-field">
+                    <input type="text" name="itemNum_${id}" placeholder=" " required>
+                    <label class="floating-label">Item Number</label>
                 </div>
-                <div class="form-group">
-                    <label>Quantity</label>
+                <div class="floating-field has-value">
                     <input type="number" name="itemQty_${id}" value="1" min="1" required>
+                    <label class="floating-label">Quantity</label>
                 </div>
-                <div class="form-group">
-                    <label>Equipment ID</label>
-                    <input type="text" name="equipId_${id}" required placeholder="MBS sticker number">
+                <div class="floating-field">
+                    <input type="text" name="equipId_${id}" placeholder=" " required>
+                    <label class="floating-label">Equipment ID (MBS sticker)</label>
                 </div>
-                <div class="form-group">
-                    <label>Model (Optional)</label>
-                    <input type="text" name="equipModel_${id}" placeholder="e.g., Ricoh MP 4055">
+                <div class="floating-field">
+                    <input type="text" name="equipModel_${id}" placeholder=" ">
+                    <label class="floating-label">Model (Optional)</label>
                 </div>
             `;
             container.appendChild(item);
@@ -1495,7 +2207,6 @@
         
         function submitAdminDelivery(e) {
             e.preventDefault();
-            
             const delivery = {
                 id: Date.now(),
                 customerName: document.getElementById('deliveryCustomerName').value,
@@ -1507,7 +2218,6 @@
                 status: 'pending',
                 createdAt: new Date().toISOString()
             };
-            
             document.querySelectorAll('#deliveryItems .line-item').forEach(item => {
                 const inputs = item.querySelectorAll('input');
                 delivery.items.push({
@@ -1517,10 +2227,8 @@
                     model: inputs[3].value || ''
                 });
             });
-            
             deliveries.unshift(delivery);
             localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
-            
             showToast('Delivery order created');
             vibrate();
             showScreen('adminDashboard');
@@ -1530,10 +2238,6 @@
         function cancelAdminDeliveryForm() {
             showScreen('adminDashboard');
             loadAdminDeliveries();
-        }
-        
-        function createDeliveryPrompt() {
-            showAdminDeliveryForm();
         }
         
         function deleteDelivery(id) {
@@ -1560,13 +2264,11 @@
         function loadAdminMeters() {
             const pending = meters.filter(m => m.status === 'pending');
             const completed = meters.filter(m => m.status === 'completed');
-            
             const el = document.getElementById('adminMeters');
             el.innerHTML = `
                 <button class="btn btn-primary" onclick="showAdminMeterForm()">Create Meter Request</button>
-                
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending meters</p></div>' : pending.map(m => `
+                <div class="section-header">Pending (${pending.length})</div>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No pending meters</p></div>' : pending.map(m => `
                     <div class="card">
                         <div class="card-title">
                             ${m.customerName} → ${m.assignedTo}
@@ -1574,13 +2276,12 @@
                         </div>
                         <div class="card-meta">${m.address || 'No address'}</div>
                         <div class="card-meta">${m.equipment.length} equipment</div>
-                        <button class="btn btn-danger btn-small" style="margin-top: 8px;" onclick="deleteMeter(${m.id})">Delete</button>
+                        <button class="btn btn-small btn-danger" style="margin-top: 12px;" onclick="deleteMeter(${m.id})">Delete</button>
                     </div>
                 `).join('')}
-                
-                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportMeters()">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed meters</p></div>' : completed.map(m => `
+                <div class="section-header">Completed (${completed.length})</div>
+                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportMeters()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No completed meters</p></div>' : completed.map(m => `
                     <div class="card">
                         <div class="card-title">${m.customerName} → ${m.assignedTo}</div>
                         <div class="card-meta">Completed ${new Date(m.completedAt).toLocaleDateString()}</div>
@@ -1591,21 +2292,16 @@
         }
         
         function showAdminMeterForm() {
-            // Populate tech dropdown
             const select = document.getElementById('meterAssignTo');
             select.innerHTML = '<option value="">Select tech...</option>' + 
                 TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
-            
-            // Reset form
+            select.parentElement.classList.remove('has-value');
             document.getElementById('meterCustomerName').value = '';
             document.getElementById('meterAddress').value = '';
             document.getElementById('meterUrgent').checked = false;
             document.getElementById('meterEquipment').innerHTML = '';
             meterEquipmentCounter = 0;
-            
-            // Add first equipment
             addMeterEquipment();
-            
             showScreen('adminMeterFormScreen');
         }
         
@@ -1616,24 +2312,24 @@
             item.className = 'line-item';
             item.innerHTML = `
                 <div class="line-item-header">
-                    <strong>Equipment ${container.children.length + 1}</strong>
-                    <button type="button" class="btn btn-danger btn-small" onclick="this.closest('.line-item').remove()">Remove</button>
+                    <span>Equipment ${container.children.length + 1}</span>
+                    <button type="button" class="line-item-remove" onclick="this.closest('.line-item').remove()">Remove</button>
                 </div>
-                <div class="form-group">
-                    <label>Equipment ID</label>
-                    <input type="text" name="equipId_${id}" required placeholder="MBS sticker number">
+                <div class="floating-field">
+                    <input type="text" name="equipId_${id}" placeholder=" " required>
+                    <label class="floating-label">Equipment ID (MBS sticker)</label>
                 </div>
-                <div class="form-group">
-                    <label>Model (Optional)</label>
-                    <input type="text" name="equipModel_${id}" placeholder="e.g., Ricoh MP 4055">
+                <div class="floating-field">
+                    <input type="text" name="equipModel_${id}" placeholder=" ">
+                    <label class="floating-label">Model (Optional)</label>
                 </div>
-                <div class="form-group">
-                    <label>Meter Type</label>
+                <div class="floating-field has-value">
                     <select name="meterType_${id}" required>
                         <option value="Black">Black Only</option>
                         <option value="Color">Color Only</option>
                         <option value="Both">Both Black and Color</option>
                     </select>
+                    <label class="floating-label">Meter Type</label>
                 </div>
             `;
             container.appendChild(item);
@@ -1641,7 +2337,6 @@
         
         function submitAdminMeter(e) {
             e.preventDefault();
-            
             const meter = {
                 id: Date.now(),
                 customerName: document.getElementById('meterCustomerName').value,
@@ -1652,7 +2347,6 @@
                 status: 'pending',
                 createdAt: new Date().toISOString()
             };
-            
             document.querySelectorAll('#meterEquipment .line-item').forEach(item => {
                 const inputs = item.querySelectorAll('input, select');
                 meter.equipment.push({
@@ -1661,19 +2355,19 @@
                     meterType: inputs[2].value
                 });
             });
-            
             meters.unshift(meter);
             localStorage.setItem('mbs_meters', JSON.stringify(meters));
-            
             showToast('Meter request created');
             vibrate();
             showScreen('adminDashboard');
-            switchAdminTab('meters');
+            const btn = Array.from(document.querySelectorAll('#adminTabs .segment')).find(b => b.textContent === 'Meters');
+            switchAdminTab('meters', btn);
         }
         
         function cancelAdminMeterForm() {
             showScreen('adminDashboard');
-            switchAdminTab('meters');
+            const btn = Array.from(document.querySelectorAll('#adminTabs .segment')).find(b => b.textContent === 'Meters');
+            switchAdminTab('meters', btn);
         }
         
         function deleteMeter(id) {
@@ -1683,10 +2377,6 @@
                 loadAdminMeters();
                 showToast('Meter request deleted');
             }
-        }
-        
-        function createMeterPrompt() {
-            showAdminMeterForm();
         }
         
         function exportMeters() {
@@ -1704,25 +2394,21 @@
         function loadAdminTransfers() {
             const pending = transfers.filter(t => t.status === 'pending');
             const completed = transfers.filter(t => t.status === 'completed');
-            
             const el = document.getElementById('adminTransfers');
             el.innerHTML = `
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending transfers</p></div>' : pending.map(t => `
+                <div class="section-header">Pending (${pending.length})</div>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No pending transfers</p></div>' : pending.map(t => `
                     <div class="card">
-                        <div class="card-title">
-                            ${t.techName} ← ${t.transferFrom}
-                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeTransfer(${t.id})">Complete</button>
-                        </div>
+                        <div class="card-title">${t.techName} ← ${t.transferFrom}</div>
                         <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
                         <div class="card-meta">${t.items.map(i => `${i.partNumber} (x${i.quantity})`).join(', ')}</div>
                         ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">Notes: ${t.notes}</div>` : ''}
+                        <button class="btn btn-small btn-primary" style="margin-top: 12px;" onclick="completeTransfer(${t.id})">Mark Complete</button>
                     </div>
                 `).join('')}
-                
-                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportTransfers()">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed transfers</p></div>' : completed.map(t => `
+                <div class="section-header">Completed (${completed.length})</div>
+                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportTransfers()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No completed transfers</p></div>' : completed.map(t => `
                     <div class="card">
                         <div class="card-title">${t.techName} ← ${t.transferFrom}</div>
                         <div class="card-meta">Completed ${new Date(t.completedAt).toLocaleDateString()}</div>
@@ -1757,25 +2443,21 @@
         function loadAdminReturns() {
             const pending = returns.filter(r => r.status === 'pending');
             const completed = returns.filter(r => r.status === 'completed');
-            
             const el = document.getElementById('adminReturns');
             el.innerHTML = `
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending returns</p></div>' : pending.map(r => `
+                <div class="section-header">Pending (${pending.length})</div>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No pending returns</p></div>' : pending.map(r => `
                     <div class="card">
-                        <div class="card-title">
-                            ${r.techName} - ${r.customerName}
-                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeReturn(${r.id})">Complete</button>
-                        </div>
+                        <div class="card-title">${r.techName} - ${r.customerName}</div>
                         <div class="card-meta">Equipment: ${r.equipmentId}</div>
                         <div class="card-meta">${new Date(r.date).toLocaleDateString()}</div>
                         <div class="card-meta">${r.items.map(i => `${i.itemNumber} (x${i.quantity}) - ${i.condition}`).join(', ')}</div>
+                        <button class="btn btn-small btn-primary" style="margin-top: 12px;" onclick="completeReturn(${r.id})">Mark Complete</button>
                     </div>
                 `).join('')}
-                
-                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportReturns()">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed returns</p></div>' : completed.map(r => `
+                <div class="section-header">Completed (${completed.length})</div>
+                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportReturns()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No completed returns</p></div>' : completed.map(r => `
                     <div class="card">
                         <div class="card-title">${r.techName} - ${r.customerName}</div>
                         <div class="card-meta">Completed ${new Date(r.completedAt).toLocaleDateString()}</div>
@@ -1806,15 +2488,14 @@
             downloadCSV(csv, 'returns');
         }
         
-        // Admin Inventory Scanner
+        // Admin Inventory
         function loadAdminInventory() {
             const el = document.getElementById('adminInventory');
             el.innerHTML = `
                 <button class="btn btn-primary" onclick="showInventorySetup()">Start Scanning Session</button>
-                
-                <h3 style="margin: 20px 0 12px;">Scan History</h3>
-                ${inventory.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No scans yet</p></div>' : `
-                    <button class="btn btn-secondary btn-small" onclick="exportInventory()">Export All to CSV</button>
+                <div class="section-header">Scan History</div>
+                ${inventory.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary);">No scans yet</p></div>' : `
+                    <button class="btn btn-tinted btn-small" onclick="exportInventory()" style="margin-bottom: 12px;">Export All to CSV</button>
                     ${inventory.map((inv, idx) => `
                         <div class="card">
                             <div class="card-title">${inv.techName} - Scan Session</div>
@@ -1829,21 +2510,23 @@
         function showInventorySetup() {
             const el = document.getElementById('adminInventory');
             el.innerHTML = `
-                <h3 style="margin-bottom: 16px;">Setup Inventory Scan</h3>
+                <div class="section-header-large" style="font-size: 22px; padding: 16px 0 12px;">Setup Inventory Scan</div>
                 <form id="inventorySetupForm" onsubmit="startInventoryScanner(event)">
-                    <div class="form-group">
-                        <label>Select Tech</label>
-                        <select id="inventoryTechSelect" required>
-                            <option value="">Choose tech...</option>
-                            ${TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('')}
-                        </select>
+                    <div class="floating-card">
+                        <div class="floating-field has-value">
+                            <select id="inventoryTechSelect" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)">
+                                <option value="">Choose tech...</option>
+                                ${TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('')}
+                            </select>
+                            <label class="floating-label">Select Tech</label>
+                        </div>
+                        <div class="floating-field has-value">
+                            <input type="date" id="inventoryDate" required placeholder=" ">
+                            <label class="floating-label">Date</label>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" id="inventoryDate" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Start Scanning</button>
-                    <button type="button" class="btn btn-outline" onclick="loadAdminInventory()">Cancel</button>
+                    <button type="submit" class="btn btn-primary mt-16">Start Scanning</button>
+                    <button type="button" class="btn btn-plain" onclick="loadAdminInventory()">Cancel</button>
                 </form>
             `;
             document.getElementById('inventoryDate').valueAsDate = new Date();
@@ -1851,26 +2534,21 @@
         
         function startInventoryScanner(e) {
             e.preventDefault();
-            
             const techName = document.getElementById('inventoryTechSelect').value;
             const date = document.getElementById('inventoryDate').value;
-            
             currentInventorySession = {
                 techName: techName,
                 date: date,
                 timestamp: new Date().toISOString(),
                 items: {}
             };
-            
             const el = document.getElementById('adminInventory');
             el.innerHTML = `
                 <div class="card">
                     <div class="card-title">Scanning: ${currentInventorySession.techName}</div>
                     <div class="card-meta">Date: ${new Date(currentInventorySession.date).toLocaleDateString()}</div>
                 </div>
-                
                 <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save Scan</button>
-                
                 <div class="scanner-area">
                     <div id="reader"></div>
                     <div class="scanner-controls">
@@ -1881,7 +2559,6 @@
                         <div id="lastScannedCode"></div>
                     </div>
                 </div>
-                
                 <div class="stats-bar">
                     <div class="stat-box">
                         <div class="stat-label">Unique Parts</div>
@@ -1893,14 +2570,12 @@
                     </div>
                 </div>
             `;
-            
             initBarcodeScanner();
         }
         
         function initBarcodeScanner() {
             const readerEl = document.getElementById('reader');
             readerEl.innerHTML = '';
-            
             scanner = new Html5QrcodeScanner('reader', {
                 fps: 30,
                 qrbox: { width: 280, height: 200 },
@@ -1915,10 +2590,8 @@
                     Html5QrcodeSupportedFormats.UPC_E,
                     Html5QrcodeSupportedFormats.QR_CODE
                 ]
-            }, false); // false = camera only, no file upload
-            
+            }, false);
             scanner.render(onInventoryScanSuccess, () => {});
-            
             setTimeout(() => {
                 const video = document.querySelector('#reader video');
                 if (video && video.srcObject) {
@@ -1933,25 +2606,21 @@
             } else {
                 currentInventorySession.items[code] = 1;
             }
-            
             document.getElementById('lastScannedCode').textContent = `✓ ${code}`;
             document.getElementById('scanNotif').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('scanNotif').style.display = 'none';
             }, 1500);
-            
             const unique = Object.keys(currentInventorySession.items).length;
             const total = Object.values(currentInventorySession.items).reduce((a,b) => a+b, 0);
             document.getElementById('uniqueParts').textContent = unique;
             document.getElementById('totalItems').textContent = total;
-            
             if (soundEnabled) beep();
             vibrate();
         }
         
         function toggleInventoryFlash() {
             if (!videoTrack) return;
-            
             try {
                 const capabilities = videoTrack.getCapabilities();
                 if (capabilities.torch) {
@@ -1970,18 +2639,10 @@
         }
         
         function stopInventoryScanner() {
-            if (scanner) {
-                scanner.clear();
-                scanner = null;
-            }
-            
-            if (flashOn) {
-                flashOn = false;
-            }
-            
+            if (scanner) { scanner.clear(); scanner = null; }
+            if (flashOn) flashOn = false;
             inventory.push(currentInventorySession);
             localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-            
             showToast('Scan session saved');
             loadAdminInventory();
         }
@@ -1996,17 +2657,16 @@
             downloadCSV(csv, 'inventory');
         }
         
-        // Admin Parts
         function loadAdminParts() {
             document.getElementById('adminParts').innerHTML = `
                 <div class="card">
                     <div class="card-title">Parts Management</div>
-                    <p style="color: var(--text-light); margin-top: 8px;">Coming soon - Manage parts database, suppliers, and stock levels</p>
+                    <p style="color: var(--ios-tertiary); margin-top: 8px;">Coming soon — Manage parts database, suppliers, and stock levels.</p>
                 </div>
             `;
         }
         
-        // Utility Functions
+        // Utilities
         function beep() {
             if (!soundEnabled) return;
             const osc = audioContext.createOscillator();
@@ -2040,6 +2700,18 @@
             a.click();
             showToast('Exported successfully');
         }
+        
+        // Floating label support for inputs with values
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('.floating-field input, .floating-field textarea, .floating-field select')) {
+                const field = e.target.closest('.floating-field');
+                if (field && e.target.value) {
+                    field.classList.add('has-value');
+                } else if (field) {
+                    field.classList.remove('has-value');
+                }
+            }
+        });
     </script>
 </body>
 </html>
