@@ -7,7 +7,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#F2F2F7">
     <title>MBS TechTools</title>
+    
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
         :root {
@@ -18,7 +22,7 @@
             --brand-blue: #4DA9DC;
             --brand-blue-soft: #7BC1E4;
             --brand-blue-bg: #E8F4FB;
-            
+
             /* iOS system colors */
             --ios-bg: #F2F2F7;
             --ios-bg-secondary: #FFFFFF;
@@ -1324,7 +1328,6 @@
 </head>
 <body>
 
-    <!-- Tech Login Screen -->
     <div class="screen active" id="techLoginScreen">
         <div class="welcome-screen">
             <div class="brand-badge">
@@ -1346,8 +1349,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Tech Dashboard -->
+    
     <div class="screen" id="techDashboard">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1379,8 +1381,7 @@
             <div class="widget-grid" id="dashboardGrid"></div>
         </div>
     </div>
-
-    <!-- Deliveries List -->
+    
     <div class="screen" id="deliveriesScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1393,8 +1394,7 @@
         </div>
         <div class="content" id="deliveriesList"></div>
     </div>
-
-    <!-- Delivery Detail -->
+    
     <div class="screen" id="deliveryDetailScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="navTo('deliveriesScreen')">
@@ -1406,8 +1406,7 @@
         </div>
         <div class="content" id="deliveryDetailContent"></div>
     </div>
-
-    <!-- Meters List -->
+    
     <div class="screen" id="metersScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1420,8 +1419,7 @@
         </div>
         <div class="content" id="metersList"></div>
     </div>
-
-    <!-- Meter Entry -->
+    
     <div class="screen" id="meterEntryScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="navTo('metersScreen')">
@@ -1433,8 +1431,7 @@
         </div>
         <div class="content" id="meterEntryContent"></div>
     </div>
-
-    <!-- Transfers Screen -->
+    
     <div class="screen" id="transfersScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1450,8 +1447,7 @@
             <div id="transfersList"></div>
         </div>
     </div>
-
-    <!-- Transfer Form -->
+    
     <div class="screen" id="transferFormScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="cancelTransferForm()">
@@ -1495,8 +1491,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Returns Screen -->
+    
     <div class="screen" id="returnsScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1512,8 +1507,7 @@
             <div id="returnsList"></div>
         </div>
     </div>
-
-    <!-- Return Form -->
+    
     <div class="screen" id="returnFormScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="cancelReturnForm()">
@@ -1561,8 +1555,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Inventory View -->
+    
     <div class="screen" id="inventoryScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1575,8 +1568,7 @@
         </div>
         <div class="content" id="inventoryList"></div>
     </div>
-
-    <!-- Completed Tasks -->
+    
     <div class="screen" id="completedScreen">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1589,8 +1581,7 @@
         </div>
         <div class="content" id="completedList"></div>
     </div>
-
-    <!-- Admin Login -->
+    
     <div class="screen" id="adminLoginScreen">
         <div class="welcome-screen">
             <div class="brand-badge">
@@ -1617,8 +1608,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Admin Dashboard -->
+    
     <div class="screen" id="adminDashboard">
         <div class="ios-header">
             <div class="ios-header-row">
@@ -1647,8 +1637,7 @@
             <div id="adminParts" style="display: none;"></div>
         </div>
     </div>
-
-    <!-- Admin Create Delivery Form -->
+    
     <div class="screen" id="adminDeliveryFormScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="cancelAdminDeliveryForm()">
@@ -1696,8 +1685,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Admin Create Meter Form -->
+    
     <div class="screen" id="adminMeterFormScreen">
         <div class="nav-bar">
             <button class="nav-back" onclick="cancelAdminMeterForm()">
@@ -1741,8 +1729,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Floating Pill Bottom Navigation -->
+    
     <div class="bottom-nav" id="bottomNav" style="display: none;">
         <div class="bottom-nav-item active" data-screen="techDashboard" onclick="navTo('techDashboard')">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 7v11h-6v-7H9v7H3V10l9-7z"/></svg>
@@ -1765,7 +1752,7 @@
             <div>Returns</div>
         </div>
     </div>
-
+    
     <script>
         // Tech List
         const TECHS = [
@@ -1785,20 +1772,72 @@
             { first: 'Paul', full: 'Paul Coatu' }
         ];
         
-        // Data Storage
+        // Data Storage & Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiA7YcvEfjC8UnqlMIdxK6PnVp11UuUg0",
+            authDomain: "mbs-app-3fdb4.firebaseapp.com",
+            databaseURL: "https://mbs-app-3fdb4-default-rtdb.firebaseio.com",
+            projectId: "mbs-app-3fdb4",
+            storageBucket: "mbs-app-3fdb4.firebasestorage.app",
+            messagingSenderId: "438678378734",
+            appId: "1:438678378734:web:13eae396cf24bbe0f17bff"
+        };
+        
+        // Start Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Set up empty arrays (they will fill up instantly from the cloud)
         let currentTech = null;
-        let deliveries = JSON.parse(localStorage.getItem('mbs_deliveries') || '[]');
-        let meters = JSON.parse(localStorage.getItem('mbs_meters') || '[]');
-        let transfers = JSON.parse(localStorage.getItem('mbs_transfers') || '[]');
-        let returns = JSON.parse(localStorage.getItem('mbs_returns') || '[]');
-        let inventory = JSON.parse(localStorage.getItem('mbs_inventory') || '[]');
+        let deliveries = [];
+        let meters = [];
+        let transfers = [];
+        let returns = [];
+        let inventory = [];
         let currentInventorySession = null;
+        
         let scanner = null;
         let videoTrack = null;
         let flashOn = false;
         let soundEnabled = true;
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
+        // Real-Time Cloud Listeners
+        db.collection("mbs_data").doc("deliveries").onSnapshot((doc) => {
+            if (doc.exists) deliveries = doc.data().items || [];
+            if (document.getElementById('deliveriesScreen').classList.contains('active')) loadDeliveries();
+            if (document.getElementById('adminDashboard').classList.contains('active')) loadAdminDeliveries();
+            if (currentTech && document.getElementById('techDashboard').classList.contains('active')) loadTechDashboard();
+        });
+        
+        db.collection("mbs_data").doc("meters").onSnapshot((doc) => {
+            if (doc.exists) meters = doc.data().items || [];
+            if (document.getElementById('metersScreen').classList.contains('active')) loadMeters();
+            if (document.getElementById('adminDashboard').classList.contains('active')) loadAdminMeters();
+            if (currentTech && document.getElementById('techDashboard').classList.contains('active')) loadTechDashboard();
+        });
+        
+        db.collection("mbs_data").doc("transfers").onSnapshot((doc) => {
+            if (doc.exists) transfers = doc.data().items || [];
+            if (document.getElementById('transfersScreen').classList.contains('active')) loadTransfers();
+            if (document.getElementById('adminDashboard').classList.contains('active')) loadAdminTransfers();
+            if (currentTech && document.getElementById('techDashboard').classList.contains('active')) loadTechDashboard();
+        });
+        
+        db.collection("mbs_data").doc("returns").onSnapshot((doc) => {
+            if (doc.exists) returns = doc.data().items || [];
+            if (document.getElementById('returnsScreen').classList.contains('active')) loadReturns();
+            if (document.getElementById('adminDashboard').classList.contains('active')) loadAdminReturns();
+            if (currentTech && document.getElementById('techDashboard').classList.contains('active')) loadTechDashboard();
+        });
+        
+        db.collection("mbs_data").doc("inventory").onSnapshot((doc) => {
+            if (doc.exists) inventory = doc.data().items || [];
+            if (document.getElementById('inventoryScreen').classList.contains('active')) loadInventoryView();
+            if (document.getElementById('adminDashboard').classList.contains('active')) loadAdminInventory();
+            if (currentTech && document.getElementById('techDashboard').classList.contains('active')) loadTechDashboard();
+        });
+
         // Initialize dates
         document.getElementById('transferDate').valueAsDate = new Date();
         document.getElementById('returnDate').valueAsDate = new Date();
@@ -1911,6 +1950,7 @@
         
         // Tech Dashboard
         function loadTechDashboard() {
+            if(!currentTech) return;
             const myDeliveries = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending').length;
             const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending').length;
             const myTransfers = transfers.filter(t => t.techName === currentTech.full && t.status === 'pending').length;
@@ -1983,6 +2023,7 @@
         
         // Deliveries
         function loadDeliveries() {
+            if(!currentTech) return;
             const mine = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending');
             document.getElementById('deliveriesCount').textContent = `${mine.length} pending`;
             const list = document.getElementById('deliveriesList');
@@ -2129,7 +2170,7 @@
                 deliveries[idx].customerPrintName = printName;
                 deliveries[idx].signature = signatureData;
                 deliveries[idx].deliveryNotes = document.getElementById('deliveryNotes').value;
-                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+                db.collection("mbs_data").doc("deliveries").set({ items: deliveries });
                 showToast('Delivery completed');
                 vibrate();
                 navTo('deliveriesScreen');
@@ -2138,6 +2179,7 @@
         
         // Meters
         function loadMeters() {
+            if(!currentTech) return;
             const mine = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending');
             document.getElementById('metersCount').textContent = `${mine.length} pending`;
             const list = document.getElementById('metersList');
@@ -2210,7 +2252,7 @@
                 });
                 meters[idx].status = 'completed';
                 meters[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_meters', JSON.stringify(meters));
+                db.collection("mbs_data").doc("meters").set({ items: meters });
                 showToast('Meters submitted');
                 vibrate();
                 navTo('metersScreen');
@@ -2272,7 +2314,7 @@
                 });
             });
             transfers.unshift(transfer);
-            localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+            db.collection("mbs_data").doc("transfers").set({ items: transfers });
             showToast('Transfer request submitted');
             vibrate();
             navTo('transfersScreen');
@@ -2281,6 +2323,7 @@
         function cancelTransferForm() { navTo('transfersScreen'); }
         
         function loadTransfers() {
+            if(!currentTech) return;
             const mine = transfers.filter(t => t.techName === currentTech.full);
             const list = document.getElementById('transfersList');
             if (mine.length === 0) {
@@ -2311,7 +2354,7 @@
         function deleteTransfer(id) {
             if (confirm('Cancel this transfer request?')) {
                 transfers = transfers.filter(t => t.id !== id);
-                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                db.collection("mbs_data").doc("transfers").set({ items: transfers });
                 loadTransfers();
                 showToast('Transfer cancelled');
             }
@@ -2357,10 +2400,6 @@
                     </select>
                     <label class="floating-label">Condition</label>
                 </div>
-                <div class="floating-field has-value">
-                    <input type="file" name="photo_${id}" accept="image/*" capture="environment" style="padding-top: 22px;">
-                    <label class="floating-label">Photo (Optional)</label>
-                </div>
             `;
             container.appendChild(item);
         }
@@ -2387,7 +2426,7 @@
                 });
             });
             returns.unshift(returnObj);
-            localStorage.setItem('mbs_returns', JSON.stringify(returns));
+            db.collection("mbs_data").doc("returns").set({ items: returns });
             showToast('Toner return submitted');
             vibrate();
             navTo('returnsScreen');
@@ -2396,6 +2435,7 @@
         function cancelReturnForm() { navTo('returnsScreen'); }
         
         function loadReturns() {
+            if(!currentTech) return;
             const mine = returns.filter(r => r.techName === currentTech.full);
             const list = document.getElementById('returnsList');
             if (mine.length === 0) {
@@ -2422,12 +2462,13 @@
         
         // Inventory View
         function loadInventoryView() {
+            if(!currentTech) return;
             const myInventory = inventory.filter(inv => inv.techName === currentTech.full);
             const list = document.getElementById('inventoryList');
             if (myInventory.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
-                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                         <div class="empty-state-title">No inventory</div>
                         <div class="empty-state-message">Inventory scans will appear here</div>
                     </div>`;
@@ -2464,12 +2505,13 @@
         
         // Completed Tasks
         function loadCompleted() {
+            if(!currentTech) return;
             const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
             const completed = [
-                ...deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'delivered' && new Date(d.deliveredAt) > sevenDaysAgo).map(d => ({...d, type: 'Delivery', date: d.deliveredAt})),
-                ...meters.filter(m => m.assignedTo === currentTech.full && m.status === 'completed' && new Date(m.completedAt) > sevenDaysAgo).map(m => ({...m, type: 'Meter Reading', date: m.completedAt})),
-                ...transfers.filter(t => t.techName === currentTech.full && t.status === 'completed' && new Date(t.completedAt) > sevenDaysAgo).map(t => ({...t, type: 'Transfer', date: t.completedAt})),
-                ...returns.filter(r => r.techName === currentTech.full && r.status === 'completed' && new Date(r.completedAt) > sevenDaysAgo).map(r => ({...r, type: 'Toner Return', date: r.completedAt}))
+                ...deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'delivered' && new Date(d.deliveredAt).getTime() > sevenDaysAgo).map(d => ({...d, type: 'Delivery', date: d.deliveredAt})),
+                ...meters.filter(m => m.assignedTo === currentTech.full && m.status === 'completed' && new Date(m.completedAt).getTime() > sevenDaysAgo).map(m => ({...m, type: 'Meter Reading', date: m.completedAt})),
+                ...transfers.filter(t => t.techName === currentTech.full && t.status === 'completed' && new Date(t.completedAt).getTime() > sevenDaysAgo).map(t => ({...t, type: 'Transfer', date: t.completedAt})),
+                ...returns.filter(r => r.techName === currentTech.full && r.status === 'completed' && new Date(r.completedAt).getTime() > sevenDaysAgo).map(r => ({...r, type: 'Toner Return', date: r.completedAt}))
             ].sort((a,b) => new Date(b.date) - new Date(a.date));
             
             const list = document.getElementById('completedList');
@@ -2694,7 +2736,7 @@
                 });
             });
             deliveries.unshift(delivery);
-            localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+            db.collection("mbs_data").doc("deliveries").set({ items: deliveries });
             showToast('Delivery order created');
             vibrate();
             showScreen('adminDashboard');
@@ -2709,7 +2751,7 @@
         function deleteDelivery(id) {
             if (confirm('Delete this delivery?')) {
                 deliveries = deliveries.filter(d => d.id !== id);
-                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+                db.collection("mbs_data").doc("deliveries").set({ items: deliveries });
                 loadAdminDeliveries();
                 showToast('Delivery deleted');
             }
@@ -2835,7 +2877,7 @@
                 });
             });
             meters.unshift(meter);
-            localStorage.setItem('mbs_meters', JSON.stringify(meters));
+            db.collection("mbs_data").doc("meters").set({ items: meters });
             showToast('Meter request created');
             vibrate();
             showScreen('adminDashboard');
@@ -2852,7 +2894,7 @@
         function deleteMeter(id) {
             if (confirm('Delete this meter request?')) {
                 meters = meters.filter(m => m.id !== id);
-                localStorage.setItem('mbs_meters', JSON.stringify(meters));
+                db.collection("mbs_data").doc("meters").set({ items: meters });
                 loadAdminMeters();
                 showToast('Meter request deleted');
             }
@@ -2894,514 +2936,4 @@
                     </div>
                 `).join('')}
                 <div class="section-header">Completed · ${completed.length}</div>
-                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportTransfers()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary); text-align: center; padding: 12px;">No completed transfers</p></div>' : completed.map(t => `
-                    <div class="card">
-                        <div style="display: flex; gap: 12px; align-items: flex-start;">
-                            <div class="admin-avatar">${initialsOf(t.techName)}</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="card-title">${t.techName}<span class="badge badge-completed">DONE</span></div>
-                                <div class="card-meta">From ${t.transferFrom} · ${new Date(t.completedAt).toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-        }
-        
-        function completeTransfer(id) {
-            const idx = transfers.findIndex(t => t.id === id);
-            if (idx !== -1) {
-                transfers[idx].status = 'completed';
-                transfers[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
-                loadAdminTransfers();
-                showToast('Transfer completed');
-            }
-        }
-        
-        function exportTransfers() {
-            const completed = transfers.filter(t => t.status === 'completed');
-            let csv = 'Tech,From,Date,Part Number,Quantity,Notes,Submitted,Completed\n';
-            completed.forEach(t => {
-                t.items.forEach(item => {
-                    csv += `"${t.techName}","${t.transferFrom}","${t.date}","${item.partNumber}","${item.quantity}","${t.notes || ''}","${new Date(t.submittedAt).toLocaleString()}","${new Date(t.completedAt).toLocaleString()}"\n`;
-                });
-            });
-            downloadCSV(csv, 'transfers');
-        }
-        
-        // Admin Returns
-        function loadAdminReturns() {
-            renderAdminOverview();
-            const pending = returns.filter(r => r.status === 'pending');
-            const completed = returns.filter(r => r.status === 'completed');
-            const el = document.getElementById('adminReturns');
-            const initialsOf = name => (name || '').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-            
-            el.innerHTML = `
-                <div class="section-header">Pending · ${pending.length}</div>
-                ${pending.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary); text-align: center; padding: 12px;">No pending returns</p></div>' : pending.map(r => `
-                    <div class="card">
-                        <div style="display: flex; gap: 12px; align-items: flex-start;">
-                            <div class="admin-avatar">${initialsOf(r.techName)}</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="card-title">${r.customerName}<span class="badge badge-pending">PENDING</span></div>
-                                <div class="card-meta">Submitted by ${r.techName} · ${new Date(r.date).toLocaleDateString()}</div>
-                                <div class="card-meta">Equipment ID: ${r.equipmentId}</div>
-                                <div class="card-meta">${r.items.map(i => `${i.itemNumber} (×${i.quantity}) - ${i.condition}`).join(', ')}</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-small btn-primary" style="margin-top: 12px;" onclick="completeReturn(${r.id})">Mark Complete</button>
-                    </div>
-                `).join('')}
-                <div class="section-header">Completed · ${completed.length}</div>
-                ${completed.length > 0 ? '<button class="btn btn-tinted btn-small" onclick="exportReturns()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
-                ${completed.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary); text-align: center; padding: 12px;">No completed returns</p></div>' : completed.map(r => `
-                    <div class="card">
-                        <div style="display: flex; gap: 12px; align-items: flex-start;">
-                            <div class="admin-avatar">${initialsOf(r.techName)}</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="card-title">${r.customerName}<span class="badge badge-completed">DONE</span></div>
-                                <div class="card-meta">By ${r.techName} · ${new Date(r.completedAt).toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-        }
-        
-        function completeReturn(id) {
-            const idx = returns.findIndex(r => r.id === id);
-            if (idx !== -1) {
-                returns[idx].status = 'completed';
-                returns[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_returns', JSON.stringify(returns));
-                loadAdminReturns();
-                showToast('Return completed');
-            }
-        }
-        
-        function exportReturns() {
-            const completed = returns.filter(r => r.status === 'completed');
-            let csv = 'Tech,Customer,Equipment ID,Date,Item Number,Quantity,Condition,Notes,Submitted,Completed\n';
-            completed.forEach(r => {
-                r.items.forEach(item => {
-                    csv += `"${r.techName}","${r.customerName}","${r.equipmentId}","${r.date}","${item.itemNumber}","${item.quantity}","${item.condition}","${r.notes || ''}","${new Date(r.submittedAt).toLocaleString()}","${new Date(r.completedAt).toLocaleString()}"\n`;
-                });
-            });
-            downloadCSV(csv, 'returns');
-        }
-        
-        // Admin Inventory
-        function loadAdminInventory() {
-            renderAdminOverview();
-            const el = document.getElementById('adminInventory');
-            const initialsOf = name => (name || '').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-            
-            el.innerHTML = `
-                <button class="btn btn-primary" onclick="showInventorySetup()">+ Start Scanning Session</button>
-                <div class="section-header">Scan History · ${inventory.length}</div>
-                ${inventory.length === 0 ? '<div class="card"><p style="color: var(--ios-tertiary); text-align: center; padding: 12px;">No scans yet</p></div>' : `
-                    <button class="btn btn-tinted btn-small" onclick="exportInventory()" style="margin-bottom: 12px;">Export All to CSV</button>
-                    ${inventory.map((inv, idx) => `
-                        <div class="card">
-                            <div style="display: flex; gap: 12px; align-items: flex-start;">
-                                <div class="admin-avatar">${initialsOf(inv.techName)}</div>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div class="card-title">${inv.techName}</div>
-                                    <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
-                                    <div class="card-meta">${Object.keys(inv.items).length} unique · ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total</div>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
-                                <button class="btn btn-tinted btn-small" onclick="editScanSession(${idx})">Edit</button>
-                                <button class="btn btn-small btn-danger" onclick="deleteScanSession(${idx})">Delete</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                `}
-            `;
-        }
-        
-        function deleteScanSession(idx) {
-            if (confirm('Delete this scan session? This cannot be undone.')) {
-                inventory.splice(idx, 1);
-                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-                loadAdminInventory();
-                showToast('Scan deleted');
-            }
-        }
-        
-        function editScanSession(idx) {
-            const inv = inventory[idx];
-            const el = document.getElementById('adminInventory');
-            
-            const renderItemsList = () => {
-                const items = Object.entries(inv.items).sort((a,b) => b[1] - a[1]);
-                if (items.length === 0) {
-                    return '<div class="card"><p style="color: var(--ios-tertiary);">No items in this scan</p></div>';
-                }
-                return items.map(([code, count]) => `
-                    <div class="card">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-family: 'SF Mono', monospace; font-size: 15px; font-weight: 600; word-break: break-all;">${code}</div>
-                                <div class="card-meta" style="margin-top: 2px;">Quantity: ${count}</div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                                <button class="qty-btn" onclick="adjustScanItem(${idx}, '${code.replace(/'/g, "\\'")}', -1)">−</button>
-                                <button class="qty-btn" onclick="adjustScanItem(${idx}, '${code.replace(/'/g, "\\'")}', 1)">+</button>
-                                <button class="qty-btn-remove" onclick="removeScanItem(${idx}, '${code.replace(/'/g, "\\'")}')" title="Remove">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            };
-            
-            el.innerHTML = `
-                <button class="btn btn-tinted btn-small" onclick="loadAdminInventory()" style="margin-bottom: 12px;">← Back</button>
-                <div class="card">
-                    <div class="card-title">${inv.techName}</div>
-                    <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
-                    <div class="card-meta">Scanned: ${new Date(inv.timestamp).toLocaleString()}</div>
-                    <div class="card-meta" id="editStatTotals" style="margin-top: 8px; font-weight: 500; color: var(--ios-secondary);">
-                        ${Object.keys(inv.items).length} unique · ${Object.values(inv.items).reduce((a,b)=>a+b,0)} total
-                    </div>
-                </div>
-                
-                <div class="section-header">Add Part Manually</div>
-                <div class="floating-card">
-                    <div class="floating-field">
-                        <input type="text" id="manualPartCode" placeholder=" ">
-                        <label class="floating-label">Part Number</label>
-                    </div>
-                    <div class="floating-field">
-                        <input type="number" id="manualPartQty" value="1" min="1" placeholder=" ">
-                        <label class="floating-label">Quantity</label>
-                    </div>
-                </div>
-                <button class="btn btn-tinted" onclick="addManualScanItem(${idx})">+ Add Part</button>
-                
-                <div class="section-header">Items (${Object.keys(inv.items).length})</div>
-                <div id="editItemsList">${renderItemsList()}</div>
-            `;
-        }
-        
-        function adjustScanItem(sessionIdx, code, delta) {
-            const inv = inventory[sessionIdx];
-            inv.items[code] = (inv.items[code] || 0) + delta;
-            if (inv.items[code] <= 0) {
-                delete inv.items[code];
-            }
-            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-            editScanSession(sessionIdx);
-        }
-        
-        function removeScanItem(sessionIdx, code) {
-            if (confirm(`Remove "${code}" from this scan?`)) {
-                delete inventory[sessionIdx].items[code];
-                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-                editScanSession(sessionIdx);
-                showToast('Item removed');
-            }
-        }
-        
-        function addManualScanItem(sessionIdx) {
-            const code = document.getElementById('manualPartCode').value.trim();
-            const qty = parseInt(document.getElementById('manualPartQty').value) || 1;
-            if (!code) {
-                showToast('Part number required');
-                return;
-            }
-            const inv = inventory[sessionIdx];
-            inv.items[code] = (inv.items[code] || 0) + qty;
-            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-            showToast(`Added ${qty}× ${code}`);
-            vibrate();
-            editScanSession(sessionIdx);
-        }
-        
-        function showInventorySetup() {
-            const el = document.getElementById('adminInventory');
-            el.innerHTML = `
-                <div class="section-header-large" style="font-size: 22px; padding: 16px 0 12px;">Setup Inventory Scan</div>
-                <form id="inventorySetupForm" onsubmit="startInventoryScanner(event)">
-                    <div class="floating-card">
-                        <div class="floating-field">
-                            <select id="inventoryTechSelect" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)">
-                                <option value="" disabled selected></option>
-                                ${TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('')}
-                            </select>
-                            <label class="floating-label">Select Tech</label>
-                        </div>
-                        <div class="floating-field has-value">
-                            <input type="date" id="inventoryDate" required placeholder=" ">
-                            <label class="floating-label">Date</label>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-16">Start Scanning</button>
-                    <button type="button" class="btn btn-plain" onclick="loadAdminInventory()">Cancel</button>
-                </form>
-            `;
-            document.getElementById('inventoryDate').valueAsDate = new Date();
-        }
-        
-        function startInventoryScanner(e) {
-            e.preventDefault();
-            const techName = document.getElementById('inventoryTechSelect').value;
-            const date = document.getElementById('inventoryDate').value;
-            currentInventorySession = {
-                techName: techName,
-                date: date,
-                timestamp: new Date().toISOString(),
-                items: {}
-            };
-            const el = document.getElementById('adminInventory');
-            el.innerHTML = `
-                <div class="card">
-                    <div class="card-title">Scanning: ${currentInventorySession.techName}</div>
-                    <div class="card-meta">Date: ${new Date(currentInventorySession.date).toLocaleDateString()}</div>
-                </div>
-                <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save</button>
-                <div class="scanner-wrapper">
-                    <div class="scanner-area">
-                        <div id="reader"></div>
-                        <div class="scan-reticle">
-                            <div class="scan-reticle-corners"></div>
-                            <div class="scan-line"></div>
-                        </div>
-                        <div class="scanner-top-bar">
-                            <div class="scanner-hint">Point at a barcode</div>
-                            <div class="scanner-controls">
-                                <button class="control-btn off" id="inventoryFlashBtn" onclick="toggleInventoryFlash()" title="Flashlight" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M7 2h10l-1 9h-3l1 11-8-12h4l-3-8z"/>
-                                    </svg>
-                                </button>
-                                <button class="control-btn active" id="inventorySoundBtn" onclick="toggleInventorySound()" title="Sound" type="button">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>
-                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="scan-notification" id="scanNotif">
-                            <div id="lastScannedCode"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="stats-bar">
-                    <div class="stat-box">
-                        <div class="stat-label">Unique Parts</div>
-                        <div class="stat-value" id="uniqueParts">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Items</div>
-                        <div class="stat-value" id="totalItems">0</div>
-                    </div>
-                </div>
-            `;
-            initBarcodeScanner();
-        }
-        
-        function initBarcodeScanner() {
-            const readerEl = document.getElementById('reader');
-            readerEl.innerHTML = '';
-            
-            // Use Html5Qrcode directly (no built-in UI) for clean integration
-            scanner = new Html5Qrcode('reader', {
-                formatsToSupport: [
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.QR_CODE
-                ],
-                verbose: false
-            });
-            
-            const config = {
-                fps: 15,
-                aspectRatio: window.innerWidth >= 768 ? 4/3 : 3/4,
-                disableFlip: false
-            };
-            
-            scanner.start(
-                { facingMode: 'environment' },
-                config,
-                onInventoryScanSuccess,
-                () => {} // ignore scan errors
-            ).then(() => {
-                // Grab video track for flashlight control
-                setTimeout(() => {
-                    const video = document.querySelector('#reader video');
-                    if (video && video.srcObject) {
-                        videoTrack = video.srcObject.getVideoTracks()[0];
-                    }
-                }, 500);
-            }).catch(err => {
-                showToast('Camera access denied');
-                console.error('Scanner start error:', err);
-            });
-        }
-        
-        let lastScanTime = 0;
-        let lastScannedCode = '';
-        function onInventoryScanSuccess(code) {
-            const now = Date.now();
-            // Debounce: ignore same code within 1.5s, or any code within 400ms
-            if (now - lastScanTime < 400) return;
-            if (code === lastScannedCode && now - lastScanTime < 1500) return;
-            lastScanTime = now;
-            lastScannedCode = code;
-            
-            if (currentInventorySession.items[code]) {
-                currentInventorySession.items[code]++;
-            } else {
-                currentInventorySession.items[code] = 1;
-            }
-            document.getElementById('lastScannedCode').textContent = `✓ ${code}  ·  ${currentInventorySession.items[code]}x`;
-            document.getElementById('scanNotif').style.display = 'block';
-            setTimeout(() => {
-                const notif = document.getElementById('scanNotif');
-                if (notif) notif.style.display = 'none';
-            }, 1500);
-            const unique = Object.keys(currentInventorySession.items).length;
-            const total = Object.values(currentInventorySession.items).reduce((a,b) => a+b, 0);
-            document.getElementById('uniqueParts').textContent = unique;
-            document.getElementById('totalItems').textContent = total;
-            if (soundEnabled) beep();
-            vibrate();
-        }
-        
-        function toggleInventoryFlash() {
-            if (!videoTrack) {
-                showToast('Flashlight not available');
-                return;
-            }
-            try {
-                const capabilities = videoTrack.getCapabilities();
-                if (capabilities && capabilities.torch) {
-                    flashOn = !flashOn;
-                    videoTrack.applyConstraints({ advanced: [{ torch: flashOn }] });
-                    const btn = document.getElementById('inventoryFlashBtn');
-                    btn.classList.toggle('active', flashOn);
-                    btn.classList.toggle('off', !flashOn);
-                } else {
-                    showToast('Flashlight not supported on this device');
-                }
-            } catch (err) {
-                showToast('Flashlight not available');
-            }
-        }
-        
-        function toggleInventorySound() {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById('inventorySoundBtn');
-            btn.classList.toggle('active', soundEnabled);
-            btn.classList.toggle('off', !soundEnabled);
-        }
-        
-        function stopInventoryScanner() {
-            if (scanner) {
-                try {
-                    scanner.stop().then(() => {
-                        scanner.clear();
-                        scanner = null;
-                    }).catch(() => {
-                        scanner = null;
-                    });
-                } catch (e) {
-                    scanner = null;
-                }
-            }
-            if (flashOn) flashOn = false;
-            videoTrack = null;
-            
-            if (Object.keys(currentInventorySession.items).length > 0) {
-                inventory.push(currentInventorySession);
-                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-                showToast('Scan session saved');
-            } else {
-                showToast('Session ended (no items scanned)');
-            }
-            loadAdminInventory();
-        }
-        
-        function exportInventory() {
-            let csv = 'Tech Name,Scan Date,Scanned At,Part Number,Quantity\n';
-            inventory.forEach(inv => {
-                Object.entries(inv.items).forEach(([code, count]) => {
-                    csv += `"${inv.techName}","${new Date(inv.date).toLocaleDateString()}","${new Date(inv.timestamp).toLocaleString()}","${code}","${count}"\n`;
-                });
-            });
-            downloadCSV(csv, 'inventory');
-        }
-        
-        function loadAdminParts() {
-            renderAdminOverview();
-            document.getElementById('adminParts').innerHTML = `
-                <div class="empty-state">
-                    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
-                    <div class="empty-state-title">Parts Management</div>
-                    <div class="empty-state-message">Coming soon — manage parts database, suppliers, and stock levels.</div>
-                </div>
-            `;
-        }
-        
-        // Utilities
-        function beep() {
-            if (!soundEnabled) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.value = 800;
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + 0.1);
-        }
-        
-        function vibrate() {
-            if ('vibrate' in navigator) navigator.vibrate(50);
-        }
-        
-        function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        
-        function downloadCSV(csv, name) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `mbs_${name}_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            showToast('Exported successfully');
-        }
-        
-        // Floating label support for inputs with values
-        document.addEventListener('input', (e) => {
-            if (e.target.matches('.floating-field input, .floating-field textarea, .floating-field select')) {
-                const field = e.target.closest('.floating-field');
-                if (field && e.target.value) {
-                    field.classList.add('has-value');
-                } else if (field) {
-                    field.classList.remove('has-value');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+                ${
