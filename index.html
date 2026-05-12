@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>MBS TechTools</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --green: #7AB800;
             --blue: #0091DA;
@@ -18,63 +20,330 @@
             --text-light: #64748B;
             --border: #E2E8F0;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            padding-bottom: 70px;
+            -webkit-font-smoothing: antialiased;
+        }
         
         .screen { display: none; min-height: calc(100vh - 70px); }
         .screen.active { display: block; }
         
-        .header { background: var(--surface); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .header { 
+            background: var(--surface); 
+            padding: 20px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
         .header h1 { font-size: 24px; font-weight: 700; }
         .header p { font-size: 14px; color: var(--text-light); margin-top: 4px; }
         
-        .content { padding: 20px; }
+        .content { padding: 0 20px 20px; }
         
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 12px; }
+        .btn { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 15px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-family: inherit; 
+            margin-bottom: 12px;
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.97); }
         .btn-primary { background: var(--green); color: white; }
         .btn-secondary { background: var(--blue); color: white; }
         .btn-outline { background: white; color: var(--text); border: 2px solid var(--border); }
         .btn-danger { background: var(--red); color: white; }
-        .btn-small { padding: 8px 14px; font-size: 13px; width: auto; display: inline-block; }
+        .btn-small { padding: 8px 14px; font-size: 13px; width: auto; display: inline-block; margin: 0 4px 4px 0; }
         
-        .card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card { 
+            background: var(--surface); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .card.urgent { border-left: 4px solid var(--red); }
+        .card.clickable { cursor: pointer; transition: transform 0.2s; }
+        .card.clickable:active { transform: scale(0.98); }
         .card-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
         .card-meta { font-size: 13px; color: var(--text-light); margin-top: 4px; }
         
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+        .badge { 
+            display: inline-block; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            margin-left: 8px;
+        }
         .badge-pending { background: var(--yellow); color: white; }
         .badge-completed { background: var(--green); color: white; }
+        .badge-urgent { background: var(--red); color: white; }
         
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .dashboard-card { background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: 12px; padding: 20px; color: white; cursor: pointer; min-height: 120px; }
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 20px;
+        }
+        .dashboard-card { 
+            background: linear-gradient(135deg, var(--green), var(--blue)); 
+            border-radius: 12px; 
+            padding: 20px; 
+            color: white; 
+            cursor: pointer; 
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+        .dashboard-card:active { transform: scale(0.97); }
         .dashboard-card h3 { font-size: 16px; margin-bottom: 4px; }
+        .dashboard-card p { font-size: 13px; opacity: 0.9; }
         .dashboard-card .count { font-size: 28px; font-weight: 800; margin-top: 8px; }
         
         .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; }
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            font-weight: 600; 
+            margin-bottom: 8px;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            font-size: 15px; 
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
         
-        .search-results { max-height: 300px; overflow-y: auto; border: 2px solid var(--border); border-radius: 10px; margin-top: 8px; background: white; }
-        .search-result { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .search-results { 
+            max-height: 300px; 
+            overflow-y: auto; 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            margin-top: 8px; 
+            background: white;
+        }
+        .search-result { 
+            padding: 12px 16px; 
+            cursor: pointer; 
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+        .search-result:hover { background: var(--bg); }
         .search-result:last-child { border-bottom: none; }
         
-        .line-item { background: var(--bg); padding: 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid var(--blue); }
-        .line-item-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .line-item { 
+            background: var(--bg); 
+            padding: 16px; 
+            border-radius: 10px; 
+            margin-bottom: 12px; 
+            border-left: 4px solid var(--blue);
+        }
+        .line-item-header { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 12px;
+        }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000; }
-        .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; cursor: pointer; color: var(--text-light); font-size: 11px; }
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: var(--surface); 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 8px 0; 
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .bottom-nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 8px; 
+            cursor: pointer; 
+            color: var(--text-light); 
+            font-size: 11px;
+            transition: color 0.2s;
+        }
         .bottom-nav-item.active { color: var(--green); }
         .bottom-nav-item .icon { font-size: 20px; margin-bottom: 4px; }
         
-        .welcome-card { background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: 16px; padding: 24px; color: white; margin-bottom: 20px; }
+        .welcome-card { 
+            background: linear-gradient(135deg, var(--green), var(--blue)); 
+            border-radius: 16px; 
+            padding: 24px; 
+            color: white; 
+            margin-bottom: 20px;
+        }
         .welcome-card h2 { font-size: 24px; margin-bottom: 4px; }
+        .welcome-card p { font-size: 14px; opacity: 0.9; }
         
-        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 600; z-index: 9999; animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .signature-pad { 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            background: white; 
+            cursor: crosshair; 
+            width: 100%; 
+            touch-action: none;
+            display: block;
+        }
+        
+        .tabs { 
+            display: flex; 
+            gap: 4px; 
+            background: var(--bg); 
+            padding: 8px 12px; 
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+        .tab { 
+            padding: 8px 12px; 
+            border: none; 
+            background: transparent; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            white-space: nowrap; 
+            font-size: 13px;
+        }
+        .tab.active { 
+            background: white; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .scanner-area { 
+            position: relative; 
+            background: #000; 
+            height: 400px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            margin: 20px 0;
+        }
+        #reader { width: 100%; height: 100%; }
+        #reader video { 
+            width: 100% !important; 
+            height: 100% !important; 
+            object-fit: cover;
+        }
+        .scanner-controls { 
+            position: absolute; 
+            top: 16px; 
+            right: 16px; 
+            display: flex; 
+            gap: 12px; 
+            z-index: 10;
+        }
+        .control-btn { 
+            width: 48px; 
+            height: 48px; 
+            background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(10px); 
+            border: none; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            font-size: 20px;
+        }
+        .control-btn.active { 
+            background: var(--green); 
+            color: white;
+        }
+        
+        .scan-notification {
+            position: absolute;
+            top: 80px;
+            left: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 4px solid var(--green);
+            display: none;
+            z-index: 10;
+        }
+        
+        .stats-bar {
+            background: var(--surface);
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        .stat-box {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--blue);
+        }
+        
+        .toast { 
+            position: fixed; 
+            bottom: 90px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: var(--green); 
+            color: white; 
+            padding: 14px 24px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            z-index: 9999; 
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); } 
+            to { opacity: 1; transform: translateX(-50%) translateY(0); } 
+        }
         @keyframes fadeOut { to { opacity: 0; } }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
-    <!-- Tech Login -->
+    <!-- Tech Login Screen -->
     <div class="screen active" id="techLoginScreen">
         <div class="header">
             <h1>MBS TechTools</h1>
@@ -87,46 +356,8 @@
                     <input type="text" id="techSearch" placeholder="Start typing..." oninput="filterTechs()" autocomplete="off">
                 </div>
                 <div class="search-results" id="techResults" style="display: none;"></div>
-                <button class="btn btn-outline" onclick="showScreen('adminLoginScreen')" style="margin-top: 16px;">Admin Login</button>
+                <button class="btn btn-outline" onclick="showScreen('adminLoginScreen')">Admin Login</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Admin Login -->
-    <div class="screen" id="adminLoginScreen">
-        <div class="header">
-            <h1>Admin Login</h1>
-        </div>
-        <div class="content">
-            <div style="max-width: 400px; margin: 40px auto;">
-                <form onsubmit="adminLogin(event)">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" id="adminUser" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="adminPass" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <button type="button" class="btn btn-outline" onclick="showScreen('techLoginScreen')">Back</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin Dashboard -->
-    <div class="screen" id="adminDashboard">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div><h1>Admin Dashboard</h1></div>
-            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
-        </div>
-        <div class="content">
-            <h3>Transfers</h3>
-            <div id="adminTransfers"></div>
-            
-            <h3 style="margin-top: 24px;">Toner Returns</h3>
-            <div id="adminReturns"></div>
         </div>
     </div>
 
@@ -143,6 +374,30 @@
             </div>
             <div class="dashboard-grid" id="dashboardGrid"></div>
         </div>
+    </div>
+
+    <!-- Deliveries List -->
+    <div class="screen" id="deliveriesScreen">
+        <div class="header"><h1>Toner Deliveries</h1></div>
+        <div class="content" id="deliveriesList"></div>
+    </div>
+
+    <!-- Delivery Detail -->
+    <div class="screen" id="deliveryDetailScreen">
+        <div class="header"><h1>Delivery Details</h1></div>
+        <div class="content" id="deliveryDetailContent"></div>
+    </div>
+
+    <!-- Meters List -->
+    <div class="screen" id="metersScreen">
+        <div class="header"><h1>Meter Readings</h1></div>
+        <div class="content" id="metersList"></div>
+    </div>
+
+    <!-- Meter Entry -->
+    <div class="screen" id="meterEntryScreen">
+        <div class="header"><h1>Enter Meters</h1></div>
+        <div class="content" id="meterEntryContent"></div>
     </div>
 
     <!-- Transfers Screen -->
@@ -163,30 +418,21 @@
                     <label>Your Name</label>
                     <input type="text" id="transferTechName" readonly>
                 </div>
-                
                 <div class="form-group">
                     <label>Transfer From</label>
-                    <select id="transferFrom" required>
-                        <option value="">Select...</option>
-                        <option value="Main Warehouse">Main Warehouse</option>
-                        <option value="">--- Techs ---</option>
-                    </select>
+                    <select id="transferFrom" required></select>
                 </div>
-                
                 <div class="form-group">
                     <label>Date</label>
                     <input type="date" id="transferDate" required>
                 </div>
-                
                 <h3 style="margin: 24px 0 12px;">Parts Needed</h3>
                 <div id="transferItems"></div>
                 <button type="button" class="btn btn-outline" onclick="addTransferItem()">+ Add Part</button>
-                
                 <div class="form-group" style="margin-top: 24px;">
                     <label>Notes (Optional)</label>
-                    <textarea id="transferNotes" rows="3" placeholder="e.g., Urgent - customer waiting"></textarea>
+                    <textarea id="transferNotes" rows="3"></textarea>
                 </div>
-                
                 <button type="submit" class="btn btn-primary">Submit Request</button>
                 <button type="button" class="btn btn-outline" onclick="cancelTransferForm()">Cancel</button>
             </form>
@@ -211,42 +457,101 @@
                     <label>Tech Name</label>
                     <input type="text" id="returnTechName" readonly>
                 </div>
-                
                 <div class="form-group">
                     <label>Customer Name</label>
                     <input type="text" id="returnCustomer" required>
                 </div>
-                
                 <div class="form-group">
                     <label>Date</label>
                     <input type="date" id="returnDate" required>
                 </div>
-                
                 <div class="form-group">
                     <label>Equipment ID</label>
-                    <input type="text" id="returnEquipmentId" required placeholder="MBS sticker number">
+                    <input type="text" id="returnEquipmentId" required>
                 </div>
-                
                 <h3 style="margin: 24px 0 12px;">Items</h3>
                 <div id="returnItems"></div>
                 <button type="button" class="btn btn-outline" onclick="addReturnItem()">+ Add Item</button>
-                
                 <div class="form-group" style="margin-top: 24px;">
                     <label>Notes (Optional)</label>
                     <textarea id="returnNotes" rows="3"></textarea>
                 </div>
-                
                 <button type="submit" class="btn btn-primary">Submit Return</button>
                 <button type="button" class="btn btn-outline" onclick="cancelReturnForm()">Cancel</button>
             </form>
         </div>
     </div>
 
-    <!-- Bottom Nav -->
+    <!-- Inventory View -->
+    <div class="screen" id="inventoryScreen">
+        <div class="header"><h1>Parts Inventory</h1></div>
+        <div class="content" id="inventoryList"></div>
+    </div>
+
+    <!-- Completed Tasks -->
+    <div class="screen" id="completedScreen">
+        <div class="header"><h1>Completed Tasks</h1></div>
+        <div class="content" id="completedList"></div>
+    </div>
+
+    <!-- Admin Login -->
+    <div class="screen" id="adminLoginScreen">
+        <div class="header"><h1>Admin Login</h1></div>
+        <div class="content">
+            <div style="max-width: 400px; margin: 40px auto;">
+                <form onsubmit="adminLogin(event)">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="adminUser" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="adminPass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-outline" onclick="showScreen('techLoginScreen')">Back</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="screen" id="adminDashboard">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div><h1>Admin Dashboard</h1></div>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
+        </div>
+        <div class="tabs">
+            <button class="tab active" onclick="switchAdminTab('deliveries')">Deliveries</button>
+            <button class="tab" onclick="switchAdminTab('meters')">Meters</button>
+            <button class="tab" onclick="switchAdminTab('transfers')">Transfers</button>
+            <button class="tab" onclick="switchAdminTab('returns')">Returns</button>
+            <button class="tab" onclick="switchAdminTab('inventory')">Inventory</button>
+            <button class="tab" onclick="switchAdminTab('parts')">Parts</button>
+        </div>
+        <div class="content">
+            <div id="adminDeliveries"></div>
+            <div id="adminMeters" style="display: none;"></div>
+            <div id="adminTransfers" style="display: none;"></div>
+            <div id="adminReturns" style="display: none;"></div>
+            <div id="adminInventory" style="display: none;"></div>
+            <div id="adminParts" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
     <div class="bottom-nav" id="bottomNav" style="display: none;">
         <div class="bottom-nav-item" onclick="navTo('techDashboard')">
             <div class="icon">🏠</div>
             <div>Home</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('deliveriesScreen')">
+            <div class="icon">📦</div>
+            <div>Deliveries</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('metersScreen')">
+            <div class="icon">📊</div>
+            <div>Meters</div>
         </div>
         <div class="bottom-nav-item" onclick="navTo('transfersScreen')">
             <div class="icon">🔄</div>
@@ -259,6 +564,7 @@
     </div>
 
     <script>
+        // Tech List
         const TECHS = [
             { first: 'Jaime', full: 'Jaime Garcia' },
             { first: 'Aaron', full: 'Aaron Campos' },
@@ -276,18 +582,38 @@
             { first: 'Paul', full: 'Paul Coatu' }
         ];
         
+        // Data Storage
         let currentTech = null;
+        let deliveries = JSON.parse(localStorage.getItem('mbs_deliveries') || '[]');
+        let meters = JSON.parse(localStorage.getItem('mbs_meters') || '[]');
         let transfers = JSON.parse(localStorage.getItem('mbs_transfers') || '[]');
         let returns = JSON.parse(localStorage.getItem('mbs_returns') || '[]');
-        let transferItemCounter = 0;
-        let returnItemCounter = 0;
+        let inventory = JSON.parse(localStorage.getItem('mbs_inventory') || '[]');
+        let currentInventorySession = null;
+        let scanner = null;
+        let videoTrack = null;
+        let flashOn = false;
+        let soundEnabled = true;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Initialize
+        // Initialize dates
         document.getElementById('transferDate').valueAsDate = new Date();
         document.getElementById('returnDate').valueAsDate = new Date();
         
         // Populate transfer dropdown
         const transferSelect = document.getElementById('transferFrom');
+        const opt1 = document.createElement('option');
+        opt1.value = '';
+        opt1.textContent = 'Select...';
+        transferSelect.appendChild(opt1);
+        const opt2 = document.createElement('option');
+        opt2.value = 'Main Warehouse';
+        opt2.textContent = 'Main Warehouse';
+        transferSelect.appendChild(opt2);
+        const opt3 = document.createElement('option');
+        opt3.disabled = true;
+        opt3.textContent = '--- Techs ---';
+        transferSelect.appendChild(opt3);
         TECHS.forEach(t => {
             const opt = document.createElement('option');
             opt.value = t.full;
@@ -295,10 +621,13 @@
             transferSelect.appendChild(opt);
         });
         
+        // Screen Management
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if (id !== 'techLoginScreen') {
+            document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
+            
+            if (id !== 'techLoginScreen' && id !== 'adminLoginScreen' && id !== 'adminDashboard') {
                 document.getElementById('bottomNav').style.display = 'flex';
             } else {
                 document.getElementById('bottomNav').style.display = 'none';
@@ -307,16 +636,24 @@
         
         function navTo(screen) {
             if (screen === 'techDashboard') loadTechDashboard();
+            if (screen === 'deliveriesScreen') loadDeliveries();
+            if (screen === 'metersScreen') loadMeters();
             if (screen === 'transfersScreen') loadTransfers();
             if (screen === 'returnsScreen') loadReturns();
+            if (screen === 'inventoryScreen') loadInventoryView();
+            if (screen === 'completedScreen') loadCompleted();
             showScreen(screen);
         }
         
+        // Tech Login
         function filterTechs() {
             const search = document.getElementById('techSearch').value.toLowerCase();
             const results = document.getElementById('techResults');
             
-            if (!search) { results.style.display = 'none'; return; }
+            if (!search) { 
+                results.style.display = 'none'; 
+                return; 
+            }
             
             const filtered = TECHS.filter(t => 
                 t.first.toLowerCase().includes(search) || 
@@ -324,12 +661,15 @@
                 (t.alias && t.alias.toLowerCase().includes(search))
             );
             
-            if (filtered.length === 0) { results.style.display = 'none'; return; }
+            if (filtered.length === 0) { 
+                results.style.display = 'none'; 
+                return; 
+            }
             
             results.innerHTML = filtered.map(t => `
                 <div class="search-result" onclick="selectTech('${t.full}')">
                     <strong>${t.full}</strong>
-                    ${t.alias ? `<span style="color: var(--text-light);">(${t.alias})</span>` : ''}
+                    ${t.alias ? `<span style="color: var(--text-light); margin-left: 8px;">(${t.alias})</span>` : ''}
                 </div>
             `).join('');
             results.style.display = 'block';
@@ -337,20 +677,34 @@
         
         function selectTech(fullName) {
             currentTech = TECHS.find(t => t.full === fullName);
+            if (!currentTech) return;
+            
             document.getElementById('techFirstName').textContent = currentTech.first;
             document.getElementById('techFullName').textContent = currentTech.full;
             loadTechDashboard();
             showScreen('techDashboard');
         }
         
+        // Tech Dashboard
         function loadTechDashboard() {
+            const myDeliveries = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending').length;
+            const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending').length;
             const myTransfers = transfers.filter(t => t.techName === currentTech.full && t.status === 'pending').length;
             const myReturns = returns.filter(r => r.techName === currentTech.full && r.status === 'pending').length;
-            const total = myTransfers + myReturns;
+            const myInventory = inventory.length;
             
+            const total = myDeliveries + myMeters + myTransfers + myReturns;
             document.getElementById('totalPending').textContent = `${total} pending task${total !== 1 ? 's' : ''}`;
             
             document.getElementById('dashboardGrid').innerHTML = `
+                <div class="dashboard-card" onclick="navTo('deliveriesScreen')">
+                    <div><h3>Deliveries</h3><p>Toner deliveries</p></div>
+                    <div class="count">${myDeliveries}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('metersScreen')">
+                    <div><h3>Meters</h3><p>Readings needed</p></div>
+                    <div class="count">${myMeters}</div>
+                </div>
                 <div class="dashboard-card" onclick="navTo('transfersScreen')">
                     <div><h3>Transfers</h3><p>Parts requests</p></div>
                     <div class="count">${myTransfers}</div>
@@ -359,14 +713,261 @@
                     <div><h3>Returns</h3><p>Toner returns</p></div>
                     <div class="count">${myReturns}</div>
                 </div>
+                <div class="dashboard-card" onclick="navTo('inventoryScreen')">
+                    <div><h3>Inventory</h3><p>View results</p></div>
+                    <div class="count">${myInventory}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('completedScreen')">
+                    <div><h3>Completed</h3><p>Last 7 days</p></div>
+                    <div class="count">✓</div>
+                </div>
             `;
         }
+        
+        // Deliveries
+        function loadDeliveries() {
+            const mine = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending');
+            const list = document.getElementById('deliveriesList');
+            
+            if (mine.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No pending deliveries</p></div>';
+            } else {
+                list.innerHTML = mine.map(d => `
+                    <div class="card ${d.urgent ? 'urgent' : ''} clickable" onclick="openDelivery(${d.id})">
+                        <div class="card-title">
+                            ${d.customerName}
+                            ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
+                        </div>
+                        <div class="card-meta">${d.address || 'No address'}</div>
+                        <div class="card-meta">${d.items.length} items</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function openDelivery(id) {
+            const delivery = deliveries.find(d => d.id === id);
+            if (!delivery) return;
+            
+            const content = document.getElementById('deliveryDetailContent');
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-title">${delivery.customerName}</div>
+                    <div class="card-meta">${delivery.address || 'No address'}</div>
+                    ${delivery.pdfUrl ? `<a href="${delivery.pdfUrl}" target="_blank" style="color: var(--blue); text-decoration: underline; display: block; margin-top: 8px;">View PDF</a>` : ''}
+                </div>
+                
+                <h3 style="margin: 20px 0 12px;">Items</h3>
+                ${delivery.items.map(item => `
+                    <div class="card">
+                        <strong>${item.itemNumber}</strong>
+                        <div class="card-meta">Quantity: ${item.quantity}</div>
+                    </div>
+                `).join('')}
+                
+                <div style="margin: 24px 0;">
+                    <h3 style="margin-bottom: 12px;">Customer Signature</h3>
+                    <canvas id="signaturePad" class="signature-pad" width="400" height="200"></canvas>
+                    <button class="btn btn-outline btn-small" onclick="clearSignature()" style="margin-top: 8px;">Clear</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Customer Name (Print)</label>
+                    <input type="text" id="customerPrintName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Delivery Notes (Optional)</label>
+                    <textarea id="deliveryNotes" rows="3"></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="completeDelivery(${id})">Mark as Delivered</button>
+            `;
+            
+            initSignaturePad();
+            showScreen('deliveryDetailScreen');
+        }
+        
+        let signatureCanvas = null;
+        let signatureCtx = null;
+        let isDrawing = false;
+        
+        function initSignaturePad() {
+            signatureCanvas = document.getElementById('signaturePad');
+            signatureCtx = signatureCanvas.getContext('2d');
+            
+            function startDrawing(x, y) {
+                isDrawing = true;
+                signatureCtx.beginPath();
+                signatureCtx.moveTo(x, y);
+            }
+            
+            function draw(x, y) {
+                if (!isDrawing) return;
+                signatureCtx.lineTo(x, y);
+                signatureCtx.stroke();
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            signatureCanvas.addEventListener('mousedown', (e) => {
+                const rect = signatureCanvas.getBoundingClientRect();
+                startDrawing(e.clientX - rect.left, e.clientY - rect.top);
+            });
+            
+            signatureCanvas.addEventListener('mousemove', (e) => {
+                const rect = signatureCanvas.getBoundingClientRect();
+                draw(e.clientX - rect.left, e.clientY - rect.top);
+            });
+            
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseleave', stopDrawing);
+            
+            signatureCanvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rect = signatureCanvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
+            });
+            
+            signatureCanvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const rect = signatureCanvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                draw(touch.clientX - rect.left, touch.clientY - rect.top);
+            });
+            
+            signatureCanvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                stopDrawing();
+            });
+            
+            signatureCtx.lineWidth = 2;
+            signatureCtx.strokeStyle = '#000';
+            signatureCtx.lineCap = 'round';
+            signatureCtx.lineJoin = 'round';
+        }
+        
+        function clearSignature() {
+            if (signatureCtx && signatureCanvas) {
+                signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            }
+        }
+        
+        function completeDelivery(id) {
+            const printName = document.getElementById('customerPrintName').value.trim();
+            if (!printName) {
+                showToast('Customer printed name required');
+                return;
+            }
+            
+            const signatureData = signatureCanvas.toDataURL();
+            
+            const idx = deliveries.findIndex(d => d.id === id);
+            if (idx !== -1) {
+                deliveries[idx].status = 'delivered';
+                deliveries[idx].deliveredAt = new Date().toISOString();
+                deliveries[idx].customerPrintName = printName;
+                deliveries[idx].signature = signatureData;
+                deliveries[idx].deliveryNotes = document.getElementById('deliveryNotes').value;
+                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+                showToast('Delivery completed');
+                vibrate();
+                navTo('deliveriesScreen');
+            }
+        }
+        
+        // Meters
+        function loadMeters() {
+            const mine = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending');
+            const list = document.getElementById('metersList');
+            
+            if (mine.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No pending meter readings</p></div>';
+            } else {
+                list.innerHTML = mine.map(m => `
+                    <div class="card ${m.urgent ? 'urgent' : ''} clickable" onclick="openMeterEntry(${m.id})">
+                        <div class="card-title">
+                            ${m.customerName}
+                            ${m.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
+                        </div>
+                        <div class="card-meta">${m.address || 'No address'}</div>
+                        <div class="card-meta">${m.equipment.length} equipment</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function openMeterEntry(id) {
+            const meter = meters.find(m => m.id === id);
+            if (!meter) return;
+            
+            const content = document.getElementById('meterEntryContent');
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-title">${meter.customerName}</div>
+                    <div class="card-meta">${meter.address || 'No address'}</div>
+                </div>
+                
+                <form id="meterForm" onsubmit="submitMeters(event, ${id})">
+                    ${meter.equipment.map((eq, idx) => `
+                        <div class="card">
+                            <div class="card-title">${eq.model}</div>
+                            <div class="card-meta">Equipment ID: ${eq.equipmentId}</div>
+                            
+                            ${eq.meterType === 'BW' || eq.meterType === 'Both' ? `
+                                <div class="form-group">
+                                    <label>Black & White Count</label>
+                                    <input type="number" name="bw_${idx}" min="0" required>
+                                </div>
+                            ` : ''}
+                            
+                            ${eq.meterType === 'Color' || eq.meterType === 'Both' ? `
+                                <div class="form-group">
+                                    <label>Color Count</label>
+                                    <input type="number" name="color_${idx}" min="0" required>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                    
+                    <button type="submit" class="btn btn-primary">Submit Readings</button>
+                </form>
+            `;
+            
+            showScreen('meterEntryScreen');
+        }
+        
+        function submitMeters(e, id) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const idx = meters.findIndex(m => m.id === id);
+            if (idx !== -1) {
+                meters[idx].equipment.forEach((eq, i) => {
+                    eq.bwReading = formData.get(`bw_${i}`) || null;
+                    eq.colorReading = formData.get(`color_${i}`) || null;
+                });
+                meters[idx].status = 'completed';
+                meters[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_meters', JSON.stringify(meters));
+                showToast('Meters submitted');
+                vibrate();
+                navTo('metersScreen');
+            }
+        }
+        
+        // Transfers (already implemented)
+        let transferItemCounter = 0;
         
         function showTransferForm() {
             document.getElementById('transferTechName').value = currentTech.full;
             document.getElementById('transferItems').innerHTML = '';
             document.getElementById('transferNotes').value = '';
             document.getElementById('transferDate').valueAsDate = new Date();
+            document.getElementById('transferFrom').value = '';
             addTransferItem();
             showScreen('transferFormScreen');
         }
@@ -395,8 +996,6 @@
         
         function submitTransfer(e) {
             e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
             
             const transfer = {
                 id: Date.now(),
@@ -419,7 +1018,6 @@
             
             transfers.unshift(transfer);
             localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
-            
             showToast('Transfer request submitted');
             vibrate();
             navTo('transfersScreen');
@@ -434,7 +1032,7 @@
             const list = document.getElementById('transfersList');
             
             if (mine.length === 0) {
-                list.innerHTML = '<div class="card"><p style="text-align: center; color: var(--text-light);">No transfer requests yet</p></div>';
+                list.innerHTML = '<div class="empty-state"><p>No transfer requests</p></div>';
             } else {
                 list.innerHTML = mine.map(t => `
                     <div class="card">
@@ -445,10 +1043,27 @@
                         <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
                         <div class="card-meta">${t.items.length} parts</div>
                         ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">${t.notes}</div>` : ''}
+                        ${t.status === 'pending' ? `
+                            <div style="margin-top: 12px;">
+                                <button class="btn btn-danger btn-small" onclick="deleteTransfer(${t.id})">Cancel</button>
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
             }
         }
+        
+        function deleteTransfer(id) {
+            if (confirm('Cancel this transfer request?')) {
+                transfers = transfers.filter(t => t.id !== id);
+                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                loadTransfers();
+                showToast('Transfer cancelled');
+            }
+        }
+        
+        // Returns (already implemented)
+        let returnItemCounter = 0;
         
         function showReturnForm() {
             document.getElementById('returnTechName').value = currentTech.full;
@@ -511,7 +1126,7 @@
                 submittedAt: new Date().toISOString()
             };
             
-            document.querySelectorAll('#returnItems .line-item').forEach((item, idx) => {
+            document.querySelectorAll('#returnItems .line-item').forEach(item => {
                 const inputs = item.querySelectorAll('input, select');
                 returnObj.items.push({
                     itemNumber: inputs[0].value,
@@ -522,7 +1137,6 @@
             
             returns.unshift(returnObj);
             localStorage.setItem('mbs_returns', JSON.stringify(returns));
-            
             showToast('Toner return submitted');
             vibrate();
             navTo('returnsScreen');
@@ -537,7 +1151,7 @@
             const list = document.getElementById('returnsList');
             
             if (mine.length === 0) {
-                list.innerHTML = '<div class="card"><p style="text-align: center; color: var(--text-light);">No toner returns yet</p></div>';
+                list.innerHTML = '<div class="empty-state"><p>No toner returns</p></div>';
             } else {
                 list.innerHTML = mine.map(r => `
                     <div class="card">
@@ -553,6 +1167,566 @@
             }
         }
         
+        // Inventory View (Tech - Read Only)
+        function loadInventoryView() {
+            const list = document.getElementById('inventoryList');
+            
+            if (inventory.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No inventory scanned yet</p></div>';
+            } else {
+                list.innerHTML = inventory.map(inv => `
+                    <div class="card">
+                        <div class="card-title">Scan Session</div>
+                        <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                        <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
+                        <button class="btn btn-secondary btn-small" style="margin-top: 12px;" onclick="viewInventoryDetails(${inventory.indexOf(inv)})">View Details</button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function viewInventoryDetails(idx) {
+            const inv = inventory[idx];
+            const list = document.getElementById('inventoryList');
+            
+            list.innerHTML = `
+                <button class="btn btn-outline btn-small" onclick="loadInventoryView()">← Back</button>
+                <div class="card">
+                    <div class="card-title">Scan Session</div>
+                    <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                </div>
+                <h3 style="margin: 20px 0 12px;">Parts Scanned</h3>
+                ${Object.entries(inv.items).sort((a,b) => b[1] - a[1]).map(([code, count]) => `
+                    <div class="card">
+                        <strong style="font-family: 'Courier New', monospace;">${code}</strong>
+                        <div class="card-meta">Quantity: ${count}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        // Completed Tasks
+        function loadCompleted() {
+            const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            const completed = [
+                ...deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'delivered' && new Date(d.deliveredAt) > sevenDaysAgo).map(d => ({...d, type: 'Delivery', date: d.deliveredAt})),
+                ...meters.filter(m => m.assignedTo === currentTech.full && m.status === 'completed' && new Date(m.completedAt) > sevenDaysAgo).map(m => ({...m, type: 'Meter Reading', date: m.completedAt})),
+                ...transfers.filter(t => t.techName === currentTech.full && t.status === 'completed' && new Date(t.completedAt) > sevenDaysAgo).map(t => ({...t, type: 'Transfer', date: t.completedAt})),
+                ...returns.filter(r => r.techName === currentTech.full && r.status === 'completed' && new Date(r.completedAt) > sevenDaysAgo).map(r => ({...r, type: 'Toner Return', date: r.completedAt}))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            const list = document.getElementById('completedList');
+            
+            if (completed.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No completed tasks in the last 7 days</p></div>';
+            } else {
+                list.innerHTML = completed.map(item => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${item.type}
+                            <span class="badge badge-completed">COMPLETED</span>
+                        </div>
+                        <div class="card-meta">${item.customerName || item.transferFrom || 'N/A'}</div>
+                        <div class="card-meta">${new Date(item.date).toLocaleString()}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Admin Login
+        function adminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            if (user === 'admin' && pass === 'mbs2024') {
+                loadAdminDashboard();
+                showScreen('adminDashboard');
+            } else {
+                showToast('Invalid credentials');
+            }
+        }
+        
+        function adminLogout() {
+            showScreen('techLoginScreen');
+        }
+        
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            ['adminDeliveries', 'adminMeters', 'adminTransfers', 'adminReturns', 'adminInventory', 'adminParts'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            
+            const tabId = 'admin' + tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById(tabId).style.display = 'block';
+            
+            if (tab === 'deliveries') loadAdminDeliveries();
+            if (tab === 'meters') loadAdminMeters();
+            if (tab === 'transfers') loadAdminTransfers();
+            if (tab === 'returns') loadAdminReturns();
+            if (tab === 'inventory') loadAdminInventory();
+            if (tab === 'parts') loadAdminParts();
+        }
+        
+        function loadAdminDashboard() {
+            loadAdminDeliveries();
+        }
+        
+        // Admin Deliveries
+        function loadAdminDeliveries() {
+            const pending = deliveries.filter(d => d.status === 'pending');
+            const completed = deliveries.filter(d => d.status === 'delivered');
+            
+            const el = document.getElementById('adminDeliveries');
+            el.innerHTML = `
+                <button class="btn btn-primary" onclick="createDeliveryPrompt()">Create Delivery Order</button>
+                
+                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending deliveries</p></div>' : pending.map(d => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${d.customerName} → ${d.assignedTo}
+                            ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
+                        </div>
+                        <div class="card-meta">${d.items.length} items</div>
+                        <button class="btn btn-danger btn-small" style="margin-top: 8px;" onclick="deleteDelivery(${d.id})">Delete</button>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin: 20px 0 12px;">Delivered (${completed.length})</h3>
+                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportDeliveries()">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed deliveries</p></div>' : completed.map(d => `
+                    <div class="card">
+                        <div class="card-title">${d.customerName} → ${d.assignedTo}</div>
+                        <div class="card-meta">Delivered ${new Date(d.deliveredAt).toLocaleDateString()}</div>
+                        <div class="card-meta">Signed by: ${d.customerPrintName}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function createDeliveryPrompt() {
+            const customerName = prompt('Customer Name:');
+            if (!customerName) return;
+            
+            const address = prompt('Address (optional):');
+            const techNum = prompt(`Assign to:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
+            const techIndex = parseInt(techNum) - 1;
+            
+            if (techIndex < 0 || techIndex >= TECHS.length) {
+                showToast('Invalid tech selection');
+                return;
+            }
+            
+            const itemNumber = prompt('Item Number:');
+            const quantity = prompt('Quantity:');
+            
+            if (!itemNumber || !quantity) return;
+            
+            const urgent = confirm('Mark as URGENT?');
+            
+            deliveries.push({
+                id: Date.now(),
+                customerName,
+                address: address || '',
+                assignedTo: TECHS[techIndex].full,
+                items: [{ itemNumber, quantity }],
+                status: 'pending',
+                urgent,
+                createdAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+            loadAdminDeliveries();
+            showToast('Delivery created');
+        }
+        
+        function deleteDelivery(id) {
+            if (confirm('Delete this delivery?')) {
+                deliveries = deliveries.filter(d => d.id !== id);
+                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
+                loadAdminDeliveries();
+                showToast('Delivery deleted');
+            }
+        }
+        
+        function exportDeliveries() {
+            const completed = deliveries.filter(d => d.status === 'delivered');
+            let csv = 'Customer,Address,Assigned To,Items,Delivered,Signed By,Notes\n';
+            completed.forEach(d => {
+                csv += `"${d.customerName}","${d.address || ''}","${d.assignedTo}","${d.items.length}","${new Date(d.deliveredAt).toLocaleString()}","${d.customerPrintName}","${d.deliveryNotes || ''}"\n`;
+            });
+            downloadCSV(csv, 'deliveries');
+        }
+        
+        // Admin Meters
+        function loadAdminMeters() {
+            const pending = meters.filter(m => m.status === 'pending');
+            const completed = meters.filter(m => m.status === 'completed');
+            
+            const el = document.getElementById('adminMeters');
+            el.innerHTML = `
+                <button class="btn btn-primary" onclick="createMeterPrompt()">Create Meter Request</button>
+                
+                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending meters</p></div>' : pending.map(m => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${m.customerName} → ${m.assignedTo}
+                            ${m.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
+                        </div>
+                        <div class="card-meta">${m.equipment.length} equipment</div>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
+                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportMeters()">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed meters</p></div>' : completed.map(m => `
+                    <div class="card">
+                        <div class="card-title">${m.customerName} → ${m.assignedTo}</div>
+                        <div class="card-meta">Completed ${new Date(m.completedAt).toLocaleDateString()}</div>
+                        ${m.equipment.map(eq => `<div class="card-meta">${eq.model}: BW=${eq.bwReading || 'N/A'}, Color=${eq.colorReading || 'N/A'}</div>`).join('')}
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function createMeterPrompt() {
+            const customerName = prompt('Customer Name:');
+            if (!customerName) return;
+            
+            const address = prompt('Address (optional):');
+            const techNum = prompt(`Assign to:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
+            const techIndex = parseInt(techNum) - 1;
+            
+            if (techIndex < 0 || techIndex >= TECHS.length) {
+                showToast('Invalid tech selection');
+                return;
+            }
+            
+            const equipmentId = prompt('Equipment ID:');
+            const model = prompt('Model:');
+            const meterTypeNum = prompt('Meter Type:\n1. BW Only\n2. Color Only\n3. Both\n\nEnter number:');
+            
+            const meterTypes = ['BW', 'Color', 'Both'];
+            const meterType = meterTypes[parseInt(meterTypeNum) - 1];
+            
+            if (!equipmentId || !model || !meterType) return;
+            
+            const urgent = confirm('Mark as URGENT?');
+            
+            meters.push({
+                id: Date.now(),
+                customerName,
+                address: address || '',
+                assignedTo: TECHS[techIndex].full,
+                equipment: [{ equipmentId, model, meterType }],
+                status: 'pending',
+                urgent,
+                createdAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('mbs_meters', JSON.stringify(meters));
+            loadAdminMeters();
+            showToast('Meter request created');
+        }
+        
+        function exportMeters() {
+            const completed = meters.filter(m => m.status === 'completed');
+            let csv = 'Customer,Address,Tech,Equipment ID,Model,BW Reading,Color Reading,Completed\n';
+            completed.forEach(m => {
+                m.equipment.forEach(eq => {
+                    csv += `"${m.customerName}","${m.address || ''}","${m.assignedTo}","${eq.equipmentId}","${eq.model}","${eq.bwReading || ''}","${eq.colorReading || ''}","${new Date(m.completedAt).toLocaleString()}"\n`;
+                });
+            });
+            downloadCSV(csv, 'meters');
+        }
+        
+        // Admin Transfers
+        function loadAdminTransfers() {
+            const pending = transfers.filter(t => t.status === 'pending');
+            const completed = transfers.filter(t => t.status === 'completed');
+            
+            const el = document.getElementById('adminTransfers');
+            el.innerHTML = `
+                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending transfers</p></div>' : pending.map(t => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${t.techName} ← ${t.transferFrom}
+                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeTransfer(${t.id})">Complete</button>
+                        </div>
+                        <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
+                        <div class="card-meta">${t.items.map(i => `${i.partNumber} (x${i.quantity})`).join(', ')}</div>
+                        ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">Notes: ${t.notes}</div>` : ''}
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
+                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportTransfers()">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed transfers</p></div>' : completed.map(t => `
+                    <div class="card">
+                        <div class="card-title">${t.techName} ← ${t.transferFrom}</div>
+                        <div class="card-meta">Completed ${new Date(t.completedAt).toLocaleDateString()}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function completeTransfer(id) {
+            const idx = transfers.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                transfers[idx].status = 'completed';
+                transfers[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                loadAdminTransfers();
+                showToast('Transfer completed');
+            }
+        }
+        
+        function exportTransfers() {
+            const completed = transfers.filter(t => t.status === 'completed');
+            let csv = 'Tech,From,Date,Part Number,Quantity,Notes,Submitted,Completed\n';
+            completed.forEach(t => {
+                t.items.forEach(item => {
+                    csv += `"${t.techName}","${t.transferFrom}","${t.date}","${item.partNumber}","${item.quantity}","${t.notes || ''}","${new Date(t.submittedAt).toLocaleString()}","${new Date(t.completedAt).toLocaleString()}"\n`;
+                });
+            });
+            downloadCSV(csv, 'transfers');
+        }
+        
+        // Admin Returns
+        function loadAdminReturns() {
+            const pending = returns.filter(r => r.status === 'pending');
+            const completed = returns.filter(r => r.status === 'completed');
+            
+            const el = document.getElementById('adminReturns');
+            el.innerHTML = `
+                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
+                ${pending.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No pending returns</p></div>' : pending.map(r => `
+                    <div class="card">
+                        <div class="card-title">
+                            ${r.techName} - ${r.customerName}
+                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeReturn(${r.id})">Complete</button>
+                        </div>
+                        <div class="card-meta">Equipment: ${r.equipmentId}</div>
+                        <div class="card-meta">${new Date(r.date).toLocaleDateString()}</div>
+                        <div class="card-meta">${r.items.map(i => `${i.itemNumber} (x${i.quantity}) - ${i.condition}`).join(', ')}</div>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
+                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportReturns()">Export CSV</button>' : ''}
+                ${completed.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No completed returns</p></div>' : completed.map(r => `
+                    <div class="card">
+                        <div class="card-title">${r.techName} - ${r.customerName}</div>
+                        <div class="card-meta">Completed ${new Date(r.completedAt).toLocaleDateString()}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function completeReturn(id) {
+            const idx = returns.findIndex(r => r.id === id);
+            if (idx !== -1) {
+                returns[idx].status = 'completed';
+                returns[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_returns', JSON.stringify(returns));
+                loadAdminReturns();
+                showToast('Return completed');
+            }
+        }
+        
+        function exportReturns() {
+            const completed = returns.filter(r => r.status === 'completed');
+            let csv = 'Tech,Customer,Equipment ID,Date,Item Number,Quantity,Condition,Notes,Submitted,Completed\n';
+            completed.forEach(r => {
+                r.items.forEach(item => {
+                    csv += `"${r.techName}","${r.customerName}","${r.equipmentId}","${r.date}","${item.itemNumber}","${item.quantity}","${item.condition}","${r.notes || ''}","${new Date(r.submittedAt).toLocaleString()}","${new Date(r.completedAt).toLocaleString()}"\n`;
+                });
+            });
+            downloadCSV(csv, 'returns');
+        }
+        
+        // Admin Inventory Scanner
+        function loadAdminInventory() {
+            const el = document.getElementById('adminInventory');
+            el.innerHTML = `
+                <button class="btn btn-primary" onclick="startInventoryScanner()">Start Scanning Session</button>
+                
+                <h3 style="margin: 20px 0 12px;">Scan History</h3>
+                ${inventory.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No scans yet</p></div>' : `
+                    <button class="btn btn-secondary btn-small" onclick="exportInventory()">Export All to CSV</button>
+                    ${inventory.map((inv, idx) => `
+                        <div class="card">
+                            <div class="card-title">Scan Session ${idx + 1}</div>
+                            <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                            <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
+                        </div>
+                    `).join('')}
+                `}
+            `;
+        }
+        
+        function startInventoryScanner() {
+            currentInventorySession = {
+                timestamp: new Date().toISOString(),
+                items: {}
+            };
+            
+            const el = document.getElementById('adminInventory');
+            el.innerHTML = `
+                <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save Scan</button>
+                
+                <div class="scanner-area">
+                    <div id="reader"></div>
+                    <div class="scanner-controls">
+                        <button class="control-btn" id="inventoryFlashBtn" onclick="toggleInventoryFlash()">💡</button>
+                        <button class="control-btn active" id="inventorySoundBtn" onclick="toggleInventorySound()">🔊</button>
+                    </div>
+                    <div class="scan-notification" id="scanNotif">
+                        <div id="lastScannedCode"></div>
+                    </div>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="stat-box">
+                        <div class="stat-label">Unique Parts</div>
+                        <div class="stat-value" id="uniqueParts">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Items</div>
+                        <div class="stat-value" id="totalItems">0</div>
+                    </div>
+                </div>
+            `;
+            
+            initBarcodeScanner();
+        }
+        
+        function initBarcodeScanner() {
+            const readerEl = document.getElementById('reader');
+            readerEl.innerHTML = '';
+            
+            scanner = new Html5QrcodeScanner('reader', {
+                fps: 30,
+                qrbox: { width: 280, height: 200 },
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.QR_CODE
+                ]
+            });
+            
+            scanner.render(onInventoryScanSuccess, () => {});
+            
+            setTimeout(() => {
+                const video = document.querySelector('#reader video');
+                if (video && video.srcObject) {
+                    videoTrack = video.srcObject.getVideoTracks()[0];
+                }
+            }, 1000);
+        }
+        
+        function onInventoryScanSuccess(code) {
+            if (currentInventorySession.items[code]) {
+                currentInventorySession.items[code]++;
+            } else {
+                currentInventorySession.items[code] = 1;
+            }
+            
+            document.getElementById('lastScannedCode').textContent = `✓ ${code}`;
+            document.getElementById('scanNotif').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('scanNotif').style.display = 'none';
+            }, 1500);
+            
+            const unique = Object.keys(currentInventorySession.items).length;
+            const total = Object.values(currentInventorySession.items).reduce((a,b) => a+b, 0);
+            document.getElementById('uniqueParts').textContent = unique;
+            document.getElementById('totalItems').textContent = total;
+            
+            if (soundEnabled) beep();
+            vibrate();
+        }
+        
+        function toggleInventoryFlash() {
+            if (!videoTrack) return;
+            
+            try {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities.torch) {
+                    flashOn = !flashOn;
+                    videoTrack.applyConstraints({ advanced: [{ torch: flashOn }] });
+                    document.getElementById('inventoryFlashBtn').classList.toggle('active', flashOn);
+                }
+            } catch (err) {
+                showToast('Flashlight not available');
+            }
+        }
+        
+        function toggleInventorySound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('inventorySoundBtn').classList.toggle('active', soundEnabled);
+        }
+        
+        function stopInventoryScanner() {
+            if (scanner) {
+                scanner.clear();
+                scanner = null;
+            }
+            
+            if (flashOn) {
+                flashOn = false;
+            }
+            
+            inventory.push(currentInventorySession);
+            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+            
+            showToast('Scan session saved');
+            loadAdminInventory();
+        }
+        
+        function exportInventory() {
+            let csv = 'Scan Date,Part Number,Quantity\n';
+            inventory.forEach(inv => {
+                Object.entries(inv.items).forEach(([code, count]) => {
+                    csv += `"${new Date(inv.timestamp).toLocaleString()}","${code}","${count}"\n`;
+                });
+            });
+            downloadCSV(csv, 'inventory');
+        }
+        
+        // Admin Parts
+        function loadAdminParts() {
+            document.getElementById('adminParts').innerHTML = `
+                <div class="card">
+                    <div class="card-title">Parts Management</div>
+                    <p style="color: var(--text-light); margin-top: 8px;">Coming soon - Manage parts database, suppliers, and stock levels</p>
+                </div>
+            `;
+        }
+        
+        // Utility Functions
+        function beep() {
+            if (!soundEnabled) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.1);
+        }
+        
         function vibrate() {
             if ('vibrate' in navigator) navigator.vibrate(50);
         }
@@ -565,86 +1739,13 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        function adminLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('adminUser').value;
-            const pass = document.getElementById('adminPass').value;
-            
-            if (user === 'admin' && pass === 'mbs2024') {
-                document.getElementById('bottomNav').style.display = 'none';
-                loadAdminDashboard();
-                showScreen('adminDashboard');
-            } else {
-                showToast('Invalid credentials');
-            }
-        }
-        
-        function adminLogout() {
-            showScreen('techLoginScreen');
-        }
-        
-        function loadAdminDashboard() {
-            // Transfers
-            const pendingTransfers = transfers.filter(t => t.status === 'pending');
-            const adminTransfersEl = document.getElementById('adminTransfers');
-            
-            if (pendingTransfers.length === 0) {
-                adminTransfersEl.innerHTML = '<div class="card"><p style="color: var(--text-light);">No pending transfers</p></div>';
-            } else {
-                adminTransfersEl.innerHTML = pendingTransfers.map(t => `
-                    <div class="card">
-                        <div class="card-title">
-                            ${t.techName} ← ${t.transferFrom}
-                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeTransfer(${t.id})">Mark Complete</button>
-                        </div>
-                        <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
-                        <div class="card-meta">${t.items.map(i => `${i.partNumber} (x${i.quantity})`).join(', ')}</div>
-                        ${t.notes ? `<div class="card-meta" style="margin-top: 8px;">Notes: ${t.notes}</div>` : ''}
-                    </div>
-                `).join('');
-            }
-            
-            // Returns
-            const pendingReturns = returns.filter(r => r.status === 'pending');
-            const adminReturnsEl = document.getElementById('adminReturns');
-            
-            if (pendingReturns.length === 0) {
-                adminReturnsEl.innerHTML = '<div class="card"><p style="color: var(--text-light);">No pending returns</p></div>';
-            } else {
-                adminReturnsEl.innerHTML = pendingReturns.map(r => `
-                    <div class="card">
-                        <div class="card-title">
-                            ${r.techName} - ${r.customerName}
-                            <button class="btn btn-primary btn-small" style="float: right;" onclick="completeReturn(${r.id})">Mark Complete</button>
-                        </div>
-                        <div class="card-meta">Equipment: ${r.equipmentId}</div>
-                        <div class="card-meta">${new Date(r.date).toLocaleDateString()}</div>
-                        <div class="card-meta">${r.items.map(i => `${i.itemNumber} (x${i.quantity}) - ${i.condition}`).join(', ')}</div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        function completeTransfer(id) {
-            const idx = transfers.findIndex(t => t.id === id);
-            if (idx !== -1) {
-                transfers[idx].status = 'completed';
-                transfers[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
-                loadAdminDashboard();
-                showToast('Transfer marked complete');
-            }
-        }
-        
-        function completeReturn(id) {
-            const idx = returns.findIndex(r => r.id === id);
-            if (idx !== -1) {
-                returns[idx].status = 'completed';
-                returns[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_returns', JSON.stringify(returns));
-                loadAdminDashboard();
-                showToast('Return marked complete');
-            }
+        function downloadCSV(csv, name) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `mbs_${name}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Exported successfully');
         }
     </script>
 </body>
