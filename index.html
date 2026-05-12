@@ -691,7 +691,7 @@
             const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending').length;
             const myTransfers = transfers.filter(t => t.techName === currentTech.full && t.status === 'pending').length;
             const myReturns = returns.filter(r => r.techName === currentTech.full && r.status === 'pending').length;
-            const myInventory = inventory.length;
+            const myInventory = inventory.filter(inv => inv.techName === currentTech.full).length;
             
             const total = myDeliveries + myMeters + myTransfers + myReturns;
             document.getElementById('totalPending').textContent = `${total} pending task${total !== 1 ? 's' : ''}`;
@@ -1169,15 +1169,16 @@
         
         // Inventory View (Tech - Read Only)
         function loadInventoryView() {
+            const myInventory = inventory.filter(inv => inv.techName === currentTech.full);
             const list = document.getElementById('inventoryList');
             
-            if (inventory.length === 0) {
+            if (myInventory.length === 0) {
                 list.innerHTML = '<div class="empty-state"><p>No inventory scanned yet</p></div>';
             } else {
-                list.innerHTML = inventory.map(inv => `
+                list.innerHTML = myInventory.map(inv => `
                     <div class="card">
-                        <div class="card-title">Scan Session</div>
-                        <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                        <div class="card-title">Inventory Scan</div>
+                        <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
                         <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
                         <button class="btn btn-secondary btn-small" style="margin-top: 12px;" onclick="viewInventoryDetails(${inventory.indexOf(inv)})">View Details</button>
                     </div>
@@ -1192,10 +1193,11 @@
             list.innerHTML = `
                 <button class="btn btn-outline btn-small" onclick="loadInventoryView()">← Back</button>
                 <div class="card">
-                    <div class="card-title">Scan Session</div>
-                    <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                    <div class="card-title">Inventory Scan</div>
+                    <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
+                    <div class="card-meta">Scanned: ${new Date(inv.timestamp).toLocaleString()}</div>
                 </div>
-                <h3 style="margin: 20px 0 12px;">Parts Scanned</h3>
+                <h3 style="margin: 20px 0 12px;">Parts in Your Car</h3>
                 ${Object.entries(inv.items).sort((a,b) => b[1] - a[1]).map(([code, count]) => `
                     <div class="card">
                         <strong style="font-family: 'Courier New', monospace;">${code}</strong>
@@ -1554,15 +1556,15 @@
         function loadAdminInventory() {
             const el = document.getElementById('adminInventory');
             el.innerHTML = `
-                <button class="btn btn-primary" onclick="startInventoryScanner()">Start Scanning Session</button>
+                <button class="btn btn-primary" onclick="showInventorySetup()">Start Scanning Session</button>
                 
                 <h3 style="margin: 20px 0 12px;">Scan History</h3>
                 ${inventory.length === 0 ? '<div class="card"><p style="color: var(--text-light);">No scans yet</p></div>' : `
                     <button class="btn btn-secondary btn-small" onclick="exportInventory()">Export All to CSV</button>
                     ${inventory.map((inv, idx) => `
                         <div class="card">
-                            <div class="card-title">Scan Session ${idx + 1}</div>
-                            <div class="card-meta">${new Date(inv.timestamp).toLocaleString()}</div>
+                            <div class="card-title">${inv.techName} - Scan Session</div>
+                            <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
                             <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
                         </div>
                     `).join('')}
@@ -1570,14 +1572,49 @@
             `;
         }
         
-        function startInventoryScanner() {
+        function showInventorySetup() {
+            const el = document.getElementById('adminInventory');
+            el.innerHTML = `
+                <h3 style="margin-bottom: 16px;">Setup Inventory Scan</h3>
+                <form id="inventorySetupForm" onsubmit="startInventoryScanner(event)">
+                    <div class="form-group">
+                        <label>Select Tech</label>
+                        <select id="inventoryTechSelect" required>
+                            <option value="">Choose tech...</option>
+                            ${TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="inventoryDate" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Start Scanning</button>
+                    <button type="button" class="btn btn-outline" onclick="loadAdminInventory()">Cancel</button>
+                </form>
+            `;
+            document.getElementById('inventoryDate').valueAsDate = new Date();
+        }
+        
+        function startInventoryScanner(e) {
+            e.preventDefault();
+            
+            const techName = document.getElementById('inventoryTechSelect').value;
+            const date = document.getElementById('inventoryDate').value;
+            
             currentInventorySession = {
+                techName: techName,
+                date: date,
                 timestamp: new Date().toISOString(),
                 items: {}
             };
             
             const el = document.getElementById('adminInventory');
             el.innerHTML = `
+                <div class="card">
+                    <div class="card-title">Scanning: ${currentInventorySession.techName}</div>
+                    <div class="card-meta">Date: ${new Date(currentInventorySession.date).toLocaleDateString()}</div>
+                </div>
+                
                 <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save Scan</button>
                 
                 <div class="scanner-area">
@@ -1613,6 +1650,8 @@
             scanner = new Html5QrcodeScanner('reader', {
                 fps: 30,
                 qrbox: { width: 280, height: 200 },
+                rememberLastUsedCamera: true,
+                showTorchButtonIfSupported: true,
                 formatsToSupport: [
                     Html5QrcodeSupportedFormats.CODE_128,
                     Html5QrcodeSupportedFormats.CODE_39,
@@ -1622,7 +1661,7 @@
                     Html5QrcodeSupportedFormats.UPC_E,
                     Html5QrcodeSupportedFormats.QR_CODE
                 ]
-            });
+            }, false); // false = camera only, no file upload
             
             scanner.render(onInventoryScanSuccess, () => {});
             
@@ -1694,10 +1733,10 @@
         }
         
         function exportInventory() {
-            let csv = 'Scan Date,Part Number,Quantity\n';
+            let csv = 'Tech Name,Scan Date,Scanned At,Part Number,Quantity\n';
             inventory.forEach(inv => {
                 Object.entries(inv.items).forEach(([code, count]) => {
-                    csv += `"${new Date(inv.timestamp).toLocaleString()}","${code}","${count}"\n`;
+                    csv += `"${inv.techName}","${new Date(inv.date).toLocaleDateString()}","${new Date(inv.timestamp).toLocaleString()}","${code}","${count}"\n`;
                 });
             });
             downloadCSV(csv, 'inventory');
