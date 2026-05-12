@@ -4,18 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MBS TechTools</title>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --mbs-green: #7AB800;
             --mbs-blue: #0091DA;
@@ -25,330 +17,62 @@
             --text-light: #64748B;
             --border: #E2E8F0;
             --red: #EF4444;
+            --yellow: #F59E0B;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
         }
-        
-        body { 
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .screen { display: none; flex-direction: column; height: 100vh; }
         .screen.active { display: flex; }
-        
-        /* Common Components */
-        .header {
-            background: var(--surface);
-            padding: 20px;
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text);
-        }
-        
-        .header p {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-top: 4px;
-        }
-        
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        .card {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 16px;
-        }
-        
-        .card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .card p {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-bottom: 16px;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        
+        .header { background: var(--surface); padding: 20px; box-shadow: var(--shadow-sm); }
+        .header h1 { font-size: 24px; font-weight: 700; }
+        .header p { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .menu-card { background: linear-gradient(135deg, var(--mbs-green), var(--mbs-blue)); border-radius: 16px; padding: 24px; color: white; cursor: pointer; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .menu-card:active { transform: scale(0.95); }
+        .menu-card h3 { font-size: 18px; }
+        .menu-card p { font-size: 13px; opacity: 0.9; }
+        .menu-card.full { grid-column: 1 / -1; }
+        .admin-link { text-align: center; padding: 20px; color: var(--text-light); font-size: 13px; cursor: pointer; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: transform 0.2s; }
         .btn:active { transform: scale(0.97); }
         .btn-primary { background: var(--mbs-green); color: white; }
         .btn-secondary { background: var(--mbs-blue); color: white; }
         .btn-outline { background: white; color: var(--text); border: 2px solid var(--border); }
         .btn-danger { background: var(--red); color: white; }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--mbs-blue);
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--mbs-green);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: var(--shadow-lg);
-            z-index: 3000;
-            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        
+        .btn-warning { background: var(--yellow); color: white; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--mbs-blue); }
+        .line-items { margin-bottom: 20px; }
+        .line-item { background: var(--bg); border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--mbs-blue); }
+        .line-item-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .btn-remove { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        .card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+        .card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+        .card-meta { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+        .card-items { background: var(--bg); padding: 12px; border-radius: 8px; margin-top: 12px; }
+        .card-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .card-item:last-child { border-bottom: none; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+        .badge-pending { background: var(--yellow); color: white; }
+        .badge-completed { background: var(--mbs-green); color: white; }
+        .tabs { display: flex; gap: 8px; background: var(--bg); padding: 12px 20px; }
+        .tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: white; box-shadow: var(--shadow-sm); }
+        .tab-badge { background: var(--mbs-green); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 6px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--mbs-green); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 600; box-shadow: var(--shadow-md); z-index: 3000; animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes fadeOut { to { opacity: 0; } }
-        
-        /* Home Menu */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        
-        .menu-card {
-            background: linear-gradient(135deg, var(--mbs-green), var(--mbs-blue));
-            border-radius: 16px;
-            padding: 24px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.2s;
-            min-height: 140px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .menu-card:active { transform: scale(0.95); }
-        .menu-card h3 { font-size: 18px; }
-        .menu-card p { font-size: 13px; opacity: 0.9; }
-        
-        .admin-link {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-light);
-            font-size: 13px;
-            cursor: pointer;
-        }
-        
-        /* Toner Returns */
-        .line-items {
-            margin-bottom: 20px;
-        }
-        
-        .line-item {
-            background: var(--bg);
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--mbs-blue);
-        }
-        
-        .line-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        
-        .btn-remove {
-            background: var(--red);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        
-        .scan-input-group {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .scan-input-group input {
-            flex: 1;
-        }
-        
-        .btn-scan {
-            background: var(--mbs-blue);
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .photo-upload {
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-        
-        .photo-upload:hover {
-            border-color: var(--mbs-blue);
-        }
-        
-        .photo-preview {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 12px;
-        }
-        
-        /* Return List */
-        .return-card {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
-            border-left: 4px solid var(--mbs-green);
-        }
-        
-        .return-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        
-        .return-meta {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-        
-        .return-items {
-            background: var(--bg);
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
-        }
-        
-        .return-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .return-item:last-child {
-            border-bottom: none;
-        }
-        
-        /* Admin Dashboard */
-        .admin-header {
-            background: var(--surface);
-            padding: 16px 20px;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            background: var(--bg);
-            padding: 12px 20px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .tab.active {
-            background: white;
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .badge {
-            display: inline-block;
-            background: var(--mbs-green);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-left: 6px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-light);
-        }
+        .btn-group { display: flex; gap: 12px; margin-top: 12px; }
+        .btn-small { padding: 8px 16px; font-size: 13px; }
     </style>
 </head>
 <body>
-    <!-- Home Screen -->
+    <!-- Home -->
     <div class="screen active" id="homeScreen">
         <div class="header">
             <h1>MBS TechTools</h1>
@@ -356,78 +80,94 @@
         </div>
         <div class="content">
             <div class="menu-grid">
-                <div class="menu-card" onclick="goToInventory()">
-                    <div>
-                        <h3>Parts Inventory</h3>
-                        <p>Scan and track parts</p>
-                    </div>
+                <div class="menu-card" onclick="showScreen('inventoryScreen')">
+                    <h3>Parts Inventory</h3>
+                    <p>Scan and track parts</p>
                 </div>
-                <div class="menu-card" onclick="goToTonerReturns()">
-                    <div>
-                        <h3>Toner Returns</h3>
-                        <p>Log customer returns</p>
-                    </div>
+                <div class="menu-card" onclick="showScreen('tonerScreen')">
+                    <h3>Toner Returns</h3>
+                    <p>Log customer returns</p>
+                </div>
+                <div class="menu-card full" onclick="goToTransfers()">
+                    <h3>Parts Transfers</h3>
+                    <p>Request parts from warehouse or other techs</p>
                 </div>
             </div>
-            <div class="admin-link" onclick="showAdminLogin()">Admin Access</div>
+            <div class="admin-link" onclick="showScreen('adminLoginScreen')">Admin Access</div>
         </div>
     </div>
 
-    <!-- Parts Inventory (existing feature - simplified here) -->
+    <!-- Inventory (placeholder) -->
     <div class="screen" id="inventoryScreen">
         <div class="header">
             <h1>Parts Inventory</h1>
             <button class="btn btn-outline" onclick="goHome()" style="margin-top: 12px;">Back to Home</button>
         </div>
-        <div class="content">
-            <p>Parts inventory feature goes here (existing code)</p>
-        </div>
+        <div class="content"><p>Parts inventory scanner (existing feature)</p></div>
     </div>
 
-    <!-- Toner Returns Form -->
-    <div class="screen" id="tonerFormScreen">
+    <!-- Toner (placeholder) -->
+    <div class="screen" id="tonerScreen">
         <div class="header">
             <h1>Toner Returns</h1>
             <button class="btn btn-outline" onclick="goHome()" style="margin-top: 12px;">Back to Home</button>
         </div>
+        <div class="content"><p>Toner returns form (existing feature)</p></div>
+    </div>
+
+    <!-- Transfers Form -->
+    <div class="screen" id="transferFormScreen">
+        <div class="header">
+            <h1>Parts Transfer Request</h1>
+            <button class="btn btn-outline" onclick="goHome()" style="margin-top: 12px;">Back</button>
+        </div>
         <div class="content">
-            <form id="tonerReturnForm" onsubmit="submitTonerReturn(event)">
+            <form id="transferForm" onsubmit="submitTransfer(event)">
                 <div class="form-group">
-                    <label>Tech Name</label>
-                    <input type="text" id="techNameToner" required>
+                    <label>Your Name</label>
+                    <input type="text" id="transferTechName" required>
                 </div>
                 <div class="form-group">
-                    <label>Customer Name</label>
-                    <input type="text" id="customerName" required>
+                    <label>Transferring From</label>
+                    <select id="transferFrom" onchange="toggleCustomFrom()" required>
+                        <option value="">Select...</option>
+                        <option value="Main Warehouse">Main Warehouse</option>
+                        <option value="Other Tech">Other Tech (specify below)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="customFromGroup" style="display: none;">
+                    <label>Tech Name</label>
+                    <input type="text" id="customFromTech">
                 </div>
                 <div class="form-group">
                     <label>Date</label>
-                    <input type="date" id="returnDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Equipment ID</label>
-                    <input type="number" id="equipmentId" placeholder="Enter ID number" required>
+                    <input type="date" id="transferDate" required>
                 </div>
                 
-                <h3 style="margin: 24px 0 16px;">Items</h3>
-                <div id="lineItems"></div>
-                <button type="button" class="btn btn-outline" onclick="addLineItem()">+ Add Item</button>
+                <h3 style="margin: 24px 0 16px;">Parts Needed</h3>
+                <div id="transferLineItems"></div>
+                <button type="button" class="btn btn-outline" onclick="addTransferItem()">+ Add Part</button>
                 
-                <div style="margin-top: 24px; display: flex; gap: 12px;">
-                    <button type="button" class="btn btn-outline" onclick="viewMyReturns()">View My Returns</button>
-                    <button type="submit" class="btn btn-primary">Submit Return</button>
+                <div class="form-group" style="margin-top: 24px;">
+                    <label>Notes / Reason (Optional)</label>
+                    <textarea id="transferNotes" rows="3" placeholder="e.g., Urgent - customer waiting"></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline" onclick="viewMyTransfers()">View My Requests</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- My Returns View -->
-    <div class="screen" id="myReturnsScreen">
+    <!-- My Transfers -->
+    <div class="screen" id="myTransfersScreen">
         <div class="header">
-            <h1>My Returns</h1>
-            <button class="btn btn-outline" onclick="backToTonerForm()" style="margin-top: 12px;">Back</button>
+            <h1>My Transfer Requests</h1>
+            <button class="btn btn-outline" onclick="backToTransferForm()" style="margin-top: 12px;">Back</button>
         </div>
-        <div class="content" id="myReturnsList"></div>
+        <div class="content" id="myTransfersList"></div>
     </div>
 
     <!-- Admin Login -->
@@ -437,11 +177,11 @@
             <button class="btn btn-outline" onclick="goHome()" style="margin-top: 12px;">Back</button>
         </div>
         <div class="content">
-            <div class="card" style="max-width: 400px; margin: 40px auto;">
+            <div style="max-width: 400px; margin: 40px auto; background: var(--surface); padding: 24px; border-radius: 12px;">
                 <form onsubmit="adminLogin(event)">
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" id="adminUser" required autofocus>
+                        <input type="text" id="adminUser" required>
                     </div>
                     <div class="form-group">
                         <label>Password</label>
@@ -455,42 +195,331 @@
 
     <!-- Admin Dashboard -->
     <div class="screen" id="adminDashboard">
-        <div class="admin-header">
-            <h1>Admin Dashboard</h1>
-            <button class="btn btn-danger" style="padding: 8px 16px;" onclick="adminLogout()">Logout</button>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Manage all requests</p>
+            </div>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
         </div>
         <div class="tabs">
-            <button class="tab active" onclick="showTab('pending')">Pending <span class="badge" id="pendingCount">0</span></button>
-            <button class="tab" onclick="showTab('completed')">History</button>
+            <button class="tab active" onclick="switchAdminTab('transfers')">Transfers <span class="tab-badge" id="transfersBadge">0</span></button>
+            <button class="tab" onclick="switchAdminTab('toner')">Toner <span class="tab-badge" id="tonerBadge">0</span></button>
         </div>
         <div class="content">
-            <div id="pendingReturns"></div>
-            <div id="completedReturns" style="display: none;"></div>
+            <div id="adminTransfers"></div>
+            <div id="adminToner" style="display: none;"></div>
         </div>
     </div>
 
     <script>
-        // Initialize
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let soundEnabled = true;
-        let tonerReturns = JSON.parse(localStorage.getItem('mbs_toner_returns') || '[]');
-        let lineItemCounter = 0;
-        let currentTech = localStorage.getItem('mbs_last_tech') || '';
+        let transfers = JSON.parse(localStorage.getItem('mbs_transfers') || '[]');
+        let transferItemCounter = 0;
+        let currentTech = localStorage.getItem('mbs_last_tech_transfer') || '';
+        let currentAdminTab = 'transfers';
         
-        document.getElementById('returnDate').valueAsDate = new Date();
-        document.getElementById('techNameToner').value = currentTech;
+        document.getElementById('transferDate').valueAsDate = new Date();
+        document.getElementById('transferTechName').value = currentTech;
         
-        function beep() {
-            if (!soundEnabled) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.value = 800;
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + 0.1);
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function goHome() { showScreen('homeScreen'); }
+        
+        function goToTransfers() {
+            showScreen('transferFormScreen');
+            if (document.getElementById('transferLineItems').children.length === 0) {
+                addTransferItem();
+            }
+        }
+        
+        function backToTransferForm() { showScreen('transferFormScreen'); }
+        
+        function toggleCustomFrom() {
+            const sel = document.getElementById('transferFrom').value;
+            const group = document.getElementById('customFromGroup');
+            const input = document.getElementById('customFromTech');
+            if (sel === 'Other Tech') {
+                group.style.display = 'block';
+                input.required = true;
+            } else {
+                group.style.display = 'none';
+                input.required = false;
+            }
+        }
+        
+        function addTransferItem() {
+            const id = transferItemCounter++;
+            const container = document.getElementById('transferLineItems');
+            const item = document.createElement('div');
+            item.className = 'line-item';
+            item.innerHTML = `
+                <div class="line-item-header">
+                    <strong>Part ${container.children.length + 1}</strong>
+                    <button type="button" class="btn-remove" onclick="this.closest('.line-item').remove()">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label>Part Number</label>
+                    <input type="text" name="partNum_${id}" required>
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" name="qty_${id}" value="1" min="1" required>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+        
+        function submitTransfer(e) {
+            e.preventDefault();
+            const tech = document.getElementById('transferTechName').value;
+            localStorage.setItem('mbs_last_tech_transfer', tech);
+            
+            let fromSource = document.getElementById('transferFrom').value;
+            if (fromSource === 'Other Tech') {
+                fromSource = document.getElementById('customFromTech').value;
+            }
+            
+            const transfer = {
+                id: Date.now(),
+                techName: tech,
+                transferFrom: fromSource,
+                date: document.getElementById('transferDate').value,
+                notes: document.getElementById('transferNotes').value,
+                items: [],
+                status: 'pending',
+                submittedAt: new Date().toISOString()
+            };
+            
+            document.querySelectorAll('#transferLineItems .line-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                transfer.items.push({
+                    partNumber: inputs[0].value,
+                    quantity: inputs[1].value
+                });
+            });
+            
+            transfers.unshift(transfer);
+            localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+            
+            showToast('Transfer request submitted');
+            document.getElementById('transferForm').reset();
+            document.getElementById('transferLineItems').innerHTML = '';
+            document.getElementById('transferDate').valueAsDate = new Date();
+            document.getElementById('transferTechName').value = tech;
+            addTransferItem();
+            vibrate();
+        }
+        
+        function viewMyTransfers() {
+            const tech = document.getElementById('transferTechName').value;
+            if (!tech) {
+                showToast('Enter your name first');
+                return;
+            }
+            
+            const mine = transfers.filter(t => t.techName === tech);
+            const list = document.getElementById('myTransfersList');
+            
+            if (mine.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No transfer requests</p></div>';
+            } else {
+                list.innerHTML = mine.map(t => `
+                    <div class="card" style="border-left-color: ${t.status === 'completed' ? 'var(--mbs-green)' : 'var(--yellow)'};">
+                        <div class="card-header">
+                            <div>
+                                <strong>From: ${t.transferFrom}</strong>
+                                <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
+                                ${t.notes ? `<div class="card-meta">${t.notes}</div>` : ''}
+                            </div>
+                            <span class="badge badge-${t.status}">${t.status.toUpperCase()}</span>
+                        </div>
+                        <div class="card-items">
+                            ${t.items.map(item => `
+                                <div class="card-item">
+                                    <strong>${item.partNumber}</strong>
+                                    <span>Qty: ${item.quantity}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${t.status === 'pending' ? `
+                            <div class="btn-group">
+                                <button class="btn btn-outline btn-small" onclick="editTransfer(${t.id})">Edit</button>
+                                <button class="btn btn-danger btn-small" onclick="cancelTransfer(${t.id})">Cancel</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+            
+            showScreen('myTransfersScreen');
+        }
+        
+        function editTransfer(id) {
+            const transfer = transfers.find(t => t.id === id);
+            if (!transfer || transfer.status !== 'pending') return;
+            
+            document.getElementById('transferTechName').value = transfer.techName;
+            document.getElementById('transferDate').value = transfer.date;
+            document.getElementById('transferNotes').value = transfer.notes || '';
+            
+            if (transfer.transferFrom === 'Main Warehouse') {
+                document.getElementById('transferFrom').value = 'Main Warehouse';
+            } else {
+                document.getElementById('transferFrom').value = 'Other Tech';
+                toggleCustomFrom();
+                document.getElementById('customFromTech').value = transfer.transferFrom;
+            }
+            
+            document.getElementById('transferLineItems').innerHTML = '';
+            transfer.items.forEach(item => {
+                addTransferItem();
+                const items = document.querySelectorAll('#transferLineItems .line-item');
+                const lastItem = items[items.length - 1];
+                lastItem.querySelector('input[type="text"]').value = item.partNumber;
+                lastItem.querySelector('input[type="number"]').value = item.quantity;
+            });
+            
+            transfers = transfers.filter(t => t.id !== id);
+            localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+            
+            showScreen('transferFormScreen');
+            showToast('Editing transfer request');
+        }
+        
+        function cancelTransfer(id) {
+            if (confirm('Cancel this transfer request?')) {
+                transfers = transfers.filter(t => t.id !== id);
+                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                viewMyTransfers();
+                showToast('Transfer cancelled');
+            }
+        }
+        
+        function adminLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('adminUser').value === 'admin' && 
+                document.getElementById('adminPass').value === 'mbs2024') {
+                showScreen('adminDashboard');
+                loadAdminDashboard();
+            } else {
+                showToast('Invalid credentials');
+            }
+        }
+        
+        function adminLogout() { goHome(); }
+        
+        function switchAdminTab(tab) {
+            currentAdminTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'transfers') {
+                document.getElementById('adminTransfers').style.display = 'block';
+                document.getElementById('adminToner').style.display = 'none';
+            } else {
+                document.getElementById('adminTransfers').style.display = 'none';
+                document.getElementById('adminToner').style.display = 'block';
+            }
+        }
+        
+        function loadAdminDashboard() {
+            const pendingTransfers = transfers.filter(t => t.status === 'pending');
+            const completedTransfers = transfers.filter(t => t.status === 'completed');
+            
+            document.getElementById('transfersBadge').textContent = pendingTransfers.length;
+            
+            const transfersEl = document.getElementById('adminTransfers');
+            transfersEl.innerHTML = '<h3 style="margin-bottom: 16px;">Pending Requests</h3>';
+            
+            if (pendingTransfers.length === 0) {
+                transfersEl.innerHTML += '<div class="empty-state"><p>No pending transfers</p></div>';
+            } else {
+                transfersEl.innerHTML += pendingTransfers.map(t => `
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <strong>${t.techName}</strong> ← ${t.transferFrom}
+                                <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
+                                ${t.notes ? `<div class="card-meta">Note: ${t.notes}</div>` : ''}
+                            </div>
+                            <button class="btn btn-primary btn-small" onclick="completeTransfer(${t.id})">Mark Complete</button>
+                        </div>
+                        <div class="card-items">
+                            ${t.items.map(item => `
+                                <div class="card-item">
+                                    <strong>${item.partNumber}</strong>
+                                    <span>Qty: ${item.quantity}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            transfersEl.innerHTML += '<h3 style="margin: 32px 0 16px;">History</h3>';
+            if (completedTransfers.length > 0) {
+                transfersEl.innerHTML += `<button class="btn btn-primary" onclick="exportTransfers()" style="margin-bottom: 16px;">Export to CSV</button>`;
+            }
+            
+            if (completedTransfers.length === 0) {
+                transfersEl.innerHTML += '<div class="empty-state"><p>No completed transfers</p></div>';
+            } else {
+                transfersEl.innerHTML += completedTransfers.map(t => `
+                    <div class="card" style="opacity: 0.7;">
+                        <div class="card-header">
+                            <div>
+                                <strong>${t.techName}</strong> ← ${t.transferFrom}
+                                <div class="card-meta">${new Date(t.date).toLocaleDateString()}</div>
+                                <div class="card-meta">Completed: ${new Date(t.completedAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div class="card-items">
+                            ${t.items.map(item => `
+                                <div class="card-item">
+                                    <strong>${item.partNumber}</strong>
+                                    <span>Qty: ${item.quantity}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function completeTransfer(id) {
+            const idx = transfers.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                transfers[idx].status = 'completed';
+                transfers[idx].completedAt = new Date().toISOString();
+                localStorage.setItem('mbs_transfers', JSON.stringify(transfers));
+                loadAdminDashboard();
+                showToast('Transfer marked complete');
+            }
+        }
+        
+        function exportTransfers() {
+            const completed = transfers.filter(t => t.status === 'completed');
+            if (completed.length === 0) {
+                showToast('No data to export');
+                return;
+            }
+            
+            let csv = 'Tech Name,Transfer From,Date,Part Number,Quantity,Notes,Submitted,Completed\n';
+            completed.forEach(t => {
+                t.items.forEach(item => {
+                    csv += `"${t.techName}","${t.transferFrom}","${t.date}","${item.partNumber}","${item.quantity}","${t.notes || ''}","${new Date(t.submittedAt).toLocaleString()}","${new Date(t.completedAt).toLocaleString()}"\n`;
+                });
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `transfers_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Exported successfully');
         }
         
         function vibrate() {
@@ -503,309 +532,6 @@
             toast.textContent = msg;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
-        }
-        
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-        
-        function goHome() { showScreen('homeScreen'); }
-        function goToInventory() { showScreen('inventoryScreen'); }
-        function goToTonerReturns() { 
-            showScreen('tonerFormScreen');
-            if (document.getElementById('lineItems').children.length === 0) {
-                addLineItem();
-            }
-        }
-        function backToTonerForm() { showScreen('tonerFormScreen'); }
-        
-        function addLineItem() {
-            const id = lineItemCounter++;
-            const container = document.getElementById('lineItems');
-            const item = document.createElement('div');
-            item.className = 'line-item';
-            item.innerHTML = `
-                <div class="line-item-header">
-                    <strong>Item ${container.children.length + 1}</strong>
-                    <button type="button" class="btn-remove" onclick="removeLineItem(this)">Remove</button>
-                </div>
-                <div class="form-group">
-                    <label>Item Number</label>
-                    <div class="scan-input-group">
-                        <input type="text" name="itemNumber_${id}" required>
-                        <button type="button" class="btn-scan" onclick="scanItemNumber(${id})">Scan</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Quantity</label>
-                    <input type="number" name="quantity_${id}" value="1" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label>Condition</label>
-                    <select name="condition_${id}" required>
-                        <option value="Used">Used</option>
-                        <option value="Empty">Empty</option>
-                        <option value="Damaged">Damaged</option>
-                        <option value="Full">Full</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Photo (Optional)</label>
-                    <input type="file" name="photo_${id}" accept="image/*" capture="environment">
-                </div>
-            `;
-            container.appendChild(item);
-        }
-        
-        function removeLineItem(btn) {
-            btn.closest('.line-item').remove();
-        }
-        
-        function scanItemNumber(id) {
-            // Simplified - in production would open camera scanner
-            const input = document.querySelector(`input[name="itemNumber_${id}"]`);
-            const scanned = prompt('Enter scanned item number:');
-            if (scanned) {
-                input.value = scanned;
-                beep();
-                vibrate();
-            }
-        }
-        
-        function submitTonerReturn(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            
-            const techName = formData.get('techNameToner');
-            localStorage.setItem('mbs_last_tech', techName);
-            
-            const returnData = {
-                id: Date.now(),
-                techName,
-                customerName: formData.get('customerName'),
-                date: formData.get('returnDate'),
-                equipmentId: formData.get('equipmentId'),
-                items: [],
-                status: 'pending',
-                submittedAt: new Date().toISOString()
-            };
-            
-            // Collect line items
-            document.querySelectorAll('.line-item').forEach((item, index) => {
-                const inputs = item.querySelectorAll('input, select');
-                const itemData = {};
-                inputs.forEach(input => {
-                    const key = input.name.split('_')[0];
-                    if (input.type === 'file' && input.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            itemData.photo = e.target.result;
-                        };
-                        reader.readAsDataURL(input.files[0]);
-                    } else {
-                        itemData[key] = input.value;
-                    }
-                });
-                returnData.items.push(itemData);
-            });
-            
-            tonerReturns.unshift(returnData);
-            localStorage.setItem('mbs_toner_returns', JSON.stringify(tonerReturns));
-            
-            showToast('Return submitted successfully');
-            form.reset();
-            document.getElementById('lineItems').innerHTML = '';
-            document.getElementById('returnDate').valueAsDate = new Date();
-            document.getElementById('techNameToner').value = techName;
-            addLineItem();
-            vibrate();
-        }
-        
-        function viewMyReturns() {
-            const techName = document.getElementById('techNameToner').value;
-            if (!techName) {
-                showToast('Enter your name first');
-                return;
-            }
-            
-            const myReturns = tonerReturns.filter(r => r.techName === techName && r.status === 'pending');
-            const list = document.getElementById('myReturnsList');
-            
-            if (myReturns.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No pending returns</p></div>';
-            } else {
-                list.innerHTML = myReturns.map(r => `
-                    <div class="return-card">
-                        <div class="return-header">
-                            <div>
-                                <strong>${r.customerName}</strong>
-                                <div class="return-meta">Eq. ID: ${r.equipmentId}</div>
-                                <div class="return-meta">${new Date(r.date).toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                        <div class="return-items">
-                            ${r.items.map(item => `
-                                <div class="return-item">
-                                    <div>
-                                        <strong>${item.itemNumber}</strong>
-                                        <div class="return-meta">${item.condition}</div>
-                                    </div>
-                                    <div>Qty: ${item.quantity}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            showScreen('myReturnsScreen');
-        }
-        
-        function showAdminLogin() {
-            showScreen('adminLoginScreen');
-        }
-        
-        function adminLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('adminUser').value;
-            const pass = document.getElementById('adminPass').value;
-            
-            // Simple auth - in production use proper authentication
-            if (user === 'admin' && pass === 'mbs2024') {
-                showScreen('adminDashboard');
-                loadAdminDashboard();
-            } else {
-                showToast('Invalid credentials');
-            }
-        }
-        
-        function adminLogout() {
-            showScreen('homeScreen');
-        }
-        
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (tab === 'pending') {
-                document.getElementById('pendingReturns').style.display = 'block';
-                document.getElementById('completedReturns').style.display = 'none';
-            } else {
-                document.getElementById('pendingReturns').style.display = 'none';
-                document.getElementById('completedReturns').style.display = 'block';
-            }
-        }
-        
-        function loadAdminDashboard() {
-            const pending = tonerReturns.filter(r => r.status === 'pending');
-            const completed = tonerReturns.filter(r => r.status === 'completed');
-            
-            document.getElementById('pendingCount').textContent = pending.length;
-            
-            const pendingEl = document.getElementById('pendingReturns');
-            if (pending.length === 0) {
-                pendingEl.innerHTML = '<div class="empty-state"><p>No pending returns</p></div>';
-            } else {
-                pendingEl.innerHTML = pending.map(r => `
-                    <div class="return-card">
-                        <div class="return-header">
-                            <div>
-                                <strong>${r.techName}</strong> - ${r.customerName}
-                                <div class="return-meta">Eq. ID: ${r.equipmentId} | ${new Date(r.date).toLocaleDateString()}</div>
-                            </div>
-                            <button class="btn btn-primary" style="padding: 8px 16px;" onclick="markCompleted(${r.id})">Mark Complete</button>
-                        </div>
-                        <div class="return-items">
-                            ${r.items.map(item => `
-                                <div class="return-item">
-                                    <div>
-                                        <strong>${item.itemNumber}</strong>
-                                        <div class="return-meta">${item.condition}</div>
-                                    </div>
-                                    <div>Qty: ${item.quantity}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            const completedEl = document.getElementById('completedReturns');
-            if (completed.length === 0) {
-                completedEl.innerHTML = '<div class="empty-state"><p>No completed returns</p></div>';
-            } else {
-                completedEl.innerHTML = `
-                    <button class="btn btn-primary" onclick="exportReturns()" style="margin-bottom: 16px;">Export to CSV</button>
-                    ${completed.map(r => `
-                        <div class="return-card" style="opacity: 0.7;">
-                            <div class="return-header">
-                                <div>
-                                    <strong>${r.techName}</strong> - ${r.customerName}
-                                    <div class="return-meta">Eq. ID: ${r.equipmentId} | ${new Date(r.date).toLocaleDateString()}</div>
-                                    <div class="return-meta">Completed: ${new Date(r.completedAt).toLocaleString()}</div>
-                                </div>
-                                <button class="btn btn-danger" style="padding: 8px 16px;" onclick="deleteReturn(${r.id})">Delete</button>
-                            </div>
-                            <div class="return-items">
-                                ${r.items.map(item => `
-                                    <div class="return-item">
-                                        <div>
-                                            <strong>${item.itemNumber}</strong>
-                                            <div class="return-meta">${item.condition}</div>
-                                        </div>
-                                        <div>Qty: ${item.quantity}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                `;
-            }
-        }
-        
-        function markCompleted(id) {
-            const returnIndex = tonerReturns.findIndex(r => r.id === id);
-            if (returnIndex !== -1) {
-                tonerReturns[returnIndex].status = 'completed';
-                tonerReturns[returnIndex].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_toner_returns', JSON.stringify(tonerReturns));
-                loadAdminDashboard();
-                showToast('Marked as completed');
-            }
-        }
-        
-        function deleteReturn(id) {
-            if (confirm('Delete this return? This cannot be undone.')) {
-                tonerReturns = tonerReturns.filter(r => r.id !== id);
-                localStorage.setItem('mbs_toner_returns', JSON.stringify(tonerReturns));
-                loadAdminDashboard();
-                showToast('Return deleted');
-            }
-        }
-        
-        function exportReturns() {
-            const completed = tonerReturns.filter(r => r.status === 'completed');
-            if (completed.length === 0) {
-                showToast('No completed returns to export');
-                return;
-            }
-            
-            let csv = 'Tech Name,Customer Name,Date,Equipment ID,Item Number,Quantity,Condition,Submitted,Completed\n';
-            completed.forEach(r => {
-                r.items.forEach(item => {
-                    csv += `"${r.techName}","${r.customerName}","${r.date}","${r.equipmentId}","${item.itemNumber}","${item.quantity}","${item.condition}","${new Date(r.submittedAt).toLocaleString()}","${new Date(r.completedAt).toLocaleString()}"\n`;
-                });
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `toner_returns_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            showToast('Exported successfully');
         }
     </script>
 </body>
