@@ -721,9 +721,32 @@
             min-height: 100vh;
             padding: 40px 24px;
         }
-        .welcome-logo {
-            max-width: 200px;
-            margin-bottom: 32px;
+        .brand-badge {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #8FCC3D 0%, #4DA9DC 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 12px 32px rgba(143, 204, 61, 0.35);
+            position: relative;
+        }
+        .brand-badge::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .brand-badge-inner {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
         }
         .welcome-title {
             font-size: 34px;
@@ -787,62 +810,218 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
         }
         
-        /* Scanner area */
+        /* Scanner area - iOS redesigned */
+        .scanner-wrapper {
+            margin: 16px 0;
+        }
         .scanner-area {
             position: relative;
             background: #000;
-            height: 360px;
-            border-radius: 16px;
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            max-height: 70vh;
+            border-radius: 20px;
             overflow: hidden;
-            margin: 16px 0;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
-        #reader { width: 100%; height: 100%; }
+        @media (min-width: 768px) {
+            .scanner-area {
+                aspect-ratio: 4 / 3;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+        #reader {
+            width: 100% !important;
+            height: 100% !important;
+            position: relative;
+        }
+        /* Override html5-qrcode default styling */
         #reader video {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
+            object-fit: cover !important;
+            display: block !important;
+        }
+        #reader > div:first-child {
+            border: none !important;
+            background: transparent !important;
+        }
+        /* Hide library's default UI - we use custom controls */
+        #reader__dashboard,
+        #reader__dashboard_section,
+        #reader__dashboard_section_csr,
+        #reader__dashboard_section_swaplink,
+        #reader__filescan_input,
+        #reader__camera_selection,
+        #reader__status_span,
+        #reader__header_message,
+        #html5-qrcode-button-camera-permission,
+        #html5-qrcode-button-camera-start,
+        #html5-qrcode-button-camera-stop,
+        #html5-qrcode-anchor-scan-type-change,
+        #reader select {
+            display: none !important;
+        }
+        #reader__scan_region {
+            background: transparent !important;
+            border: none !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 100% !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        #reader__scan_region > img { display: none !important; }
+        
+        /* Custom scan reticle overlay */
+        .scan-reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 280px;
+            aspect-ratio: 4 / 3;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .scan-reticle::before,
+        .scan-reticle::after {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 3px solid white;
+        }
+        .scan-reticle::before {
+            top: -2px; left: -2px;
+            border-right: none;
+            border-bottom: none;
+            border-radius: 16px 0 0 0;
+        }
+        .scan-reticle::after {
+            bottom: -2px; right: -2px;
+            border-left: none;
+            border-top: none;
+            border-radius: 0 0 16px 0;
+        }
+        .scan-reticle-corners {
+            position: absolute;
+            inset: 0;
+        }
+        .scan-reticle-corners::before,
+        .scan-reticle-corners::after {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 3px solid white;
+        }
+        .scan-reticle-corners::before {
+            top: -2px; right: -2px;
+            border-left: none;
+            border-bottom: none;
+            border-radius: 0 16px 0 0;
+        }
+        .scan-reticle-corners::after {
+            bottom: -2px; left: -2px;
+            border-right: none;
+            border-top: none;
+            border-radius: 0 0 0 16px;
+        }
+        .scan-line {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            top: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, var(--brand-green) 50%, transparent 100%);
+            box-shadow: 0 0 12px var(--brand-green);
+            animation: scanLine 2s ease-in-out infinite;
+        }
+        @keyframes scanLine {
+            0%, 100% { top: 15%; opacity: 0.6; }
+            50% { top: 85%; opacity: 1; }
+        }
+        
+        /* Scanner top bar overlay */
+        .scanner-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        .scanner-hint {
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.9;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
         }
         .scanner-controls {
-            position: absolute;
-            top: 16px;
-            right: 16px;
             display: flex;
             gap: 10px;
-            z-index: 10;
         }
         .control-btn {
             width: 44px;
             height: 44px;
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.2);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: none;
+            border: 1px solid rgba(255,255,255,0.25);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
-            color: var(--ios-label);
-        }
-        .control-btn.active {
-            background: var(--brand-green);
             color: white;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .control-btn:active { transform: scale(0.9); }
+        .control-btn svg { width: 22px; height: 22px; }
+        .control-btn.active {
+            background: rgba(255,255,255,0.95);
+            color: var(--brand-green);
+        }
+        .control-btn.off {
+            opacity: 0.55;
         }
         .scan-notification {
             position: absolute;
-            top: 80px;
+            bottom: 16px;
             left: 16px;
             right: 16px;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.96);
             backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border-left: 4px solid var(--brand-green);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 14px 16px;
+            border-radius: 14px;
             display: none;
             z-index: 10;
             font-weight: 600;
             font-size: 15px;
+            color: var(--brand-green);
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: scanPop 0.3s ease;
+        }
+        @keyframes scanPop {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
         
         /* Stats */
@@ -925,6 +1104,69 @@
         .row-flex { display: flex; gap: 10px; align-items: center; }
         .mt-16 { margin-top: 16px; }
         .mt-24 { margin-top: 24px; }
+        
+        /* ============ RESPONSIVE: Tablet & Desktop ============ */
+        @media (min-width: 768px) {
+            body {
+                background: var(--ios-bg);
+            }
+            .screen {
+                max-width: 720px;
+                margin: 0 auto;
+                background: var(--ios-bg);
+                min-height: 100vh;
+            }
+            .ios-header, .nav-bar {
+                max-width: 720px;
+                margin: 0 auto;
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                width: 100%;
+            }
+            .ios-title { font-size: 38px; }
+            .widget-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+            .widget { min-height: 140px; padding: 20px; }
+            .widget-count { font-size: 32px; }
+            .hero-card { padding: 32px; }
+            .hero-name { font-size: 32px; }
+            .hero-stat-num { font-size: 36px; }
+            .content { padding: 0 24px 24px; }
+            .bottom-nav {
+                bottom: calc(24px + var(--safe-bottom));
+            }
+            .welcome-form { max-width: 440px; }
+            .welcome-title { font-size: 40px; }
+        }
+        
+        @media (min-width: 1024px) {
+            .screen {
+                max-width: 900px;
+            }
+            .ios-header, .nav-bar {
+                max-width: 900px;
+            }
+            .widget-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .widget { min-height: 160px; }
+            .content { padding: 0 32px 32px; }
+        }
+        
+        /* Inputs and form elements - cross device sizing */
+        input, select, textarea, button {
+            font-size: 16px; /* prevents iOS zoom on focus */
+        }
+        @media (min-width: 768px) {
+            .floating-field input,
+            .floating-field select,
+            .floating-field textarea {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -932,8 +1174,10 @@
     <!-- Tech Login Screen -->
     <div class="screen active" id="techLoginScreen">
         <div class="welcome-screen">
-            <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" class="welcome-logo">
-            <h1 class="welcome-title">MBS TechTools</h1>
+            <div class="brand-badge">
+                <div class="brand-badge-inner">MBS</div>
+            </div>
+            <h1 class="welcome-title">TechTools</h1>
             <p class="welcome-subtitle">Select your name to continue</p>
             
             <div class="welcome-form">
@@ -1195,7 +1439,9 @@
     <!-- Admin Login -->
     <div class="screen" id="adminLoginScreen">
         <div class="welcome-screen">
-            <img src="https://mbsworks.com/wp-content/uploads/2020/06/MBS-MBSit.png" alt="MBS Works" class="welcome-logo">
+            <div class="brand-badge">
+                <div class="brand-badge-inner">MBS</div>
+            </div>
             <h1 class="welcome-title">Admin Login</h1>
             <p class="welcome-subtitle">Enter your credentials</p>
             
@@ -2549,14 +2795,33 @@
                     <div class="card-meta">Date: ${new Date(currentInventorySession.date).toLocaleDateString()}</div>
                 </div>
                 <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save Scan</button>
-                <div class="scanner-area">
-                    <div id="reader"></div>
-                    <div class="scanner-controls">
-                        <button class="control-btn" id="inventoryFlashBtn" onclick="toggleInventoryFlash()">💡</button>
-                        <button class="control-btn active" id="inventorySoundBtn" onclick="toggleInventorySound()">🔊</button>
-                    </div>
-                    <div class="scan-notification" id="scanNotif">
-                        <div id="lastScannedCode"></div>
+                <div class="scanner-wrapper">
+                    <div class="scanner-area">
+                        <div id="reader"></div>
+                        <div class="scan-reticle">
+                            <div class="scan-reticle-corners"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                        <div class="scanner-top-bar">
+                            <div class="scanner-hint">Point at a barcode</div>
+                            <div class="scanner-controls">
+                                <button class="control-btn off" id="inventoryFlashBtn" onclick="toggleInventoryFlash()" title="Flashlight" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M7 2h10l-1 9h-3l1 11-8-12h4l-3-8z"/>
+                                    </svg>
+                                </button>
+                                <button class="control-btn active" id="inventorySoundBtn" onclick="toggleInventorySound()" title="Sound" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="scan-notification" id="scanNotif">
+                            <div id="lastScannedCode"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="stats-bar">
@@ -2576,11 +2841,9 @@
         function initBarcodeScanner() {
             const readerEl = document.getElementById('reader');
             readerEl.innerHTML = '';
-            scanner = new Html5QrcodeScanner('reader', {
-                fps: 30,
-                qrbox: { width: 280, height: 200 },
-                rememberLastUsedCamera: true,
-                showTorchButtonIfSupported: true,
+            
+            // Use Html5Qrcode directly (no built-in UI) for clean integration
+            scanner = new Html5Qrcode('reader', {
                 formatsToSupport: [
                     Html5QrcodeSupportedFormats.CODE_128,
                     Html5QrcodeSupportedFormats.CODE_39,
@@ -2589,27 +2852,55 @@
                     Html5QrcodeSupportedFormats.UPC_A,
                     Html5QrcodeSupportedFormats.UPC_E,
                     Html5QrcodeSupportedFormats.QR_CODE
-                ]
-            }, false);
-            scanner.render(onInventoryScanSuccess, () => {});
-            setTimeout(() => {
-                const video = document.querySelector('#reader video');
-                if (video && video.srcObject) {
-                    videoTrack = video.srcObject.getVideoTracks()[0];
-                }
-            }, 1000);
+                ],
+                verbose: false
+            });
+            
+            const config = {
+                fps: 15,
+                aspectRatio: window.innerWidth >= 768 ? 4/3 : 3/4,
+                disableFlip: false
+            };
+            
+            scanner.start(
+                { facingMode: 'environment' },
+                config,
+                onInventoryScanSuccess,
+                () => {} // ignore scan errors
+            ).then(() => {
+                // Grab video track for flashlight control
+                setTimeout(() => {
+                    const video = document.querySelector('#reader video');
+                    if (video && video.srcObject) {
+                        videoTrack = video.srcObject.getVideoTracks()[0];
+                    }
+                }, 500);
+            }).catch(err => {
+                showToast('Camera access denied');
+                console.error('Scanner start error:', err);
+            });
         }
         
+        let lastScanTime = 0;
+        let lastScannedCode = '';
         function onInventoryScanSuccess(code) {
+            const now = Date.now();
+            // Debounce: ignore same code within 1.5s, or any code within 400ms
+            if (now - lastScanTime < 400) return;
+            if (code === lastScannedCode && now - lastScanTime < 1500) return;
+            lastScanTime = now;
+            lastScannedCode = code;
+            
             if (currentInventorySession.items[code]) {
                 currentInventorySession.items[code]++;
             } else {
                 currentInventorySession.items[code] = 1;
             }
-            document.getElementById('lastScannedCode').textContent = `✓ ${code}`;
+            document.getElementById('lastScannedCode').textContent = `✓ ${code}  ·  ${currentInventorySession.items[code]}x`;
             document.getElementById('scanNotif').style.display = 'block';
             setTimeout(() => {
-                document.getElementById('scanNotif').style.display = 'none';
+                const notif = document.getElementById('scanNotif');
+                if (notif) notif.style.display = 'none';
             }, 1500);
             const unique = Object.keys(currentInventorySession.items).length;
             const total = Object.values(currentInventorySession.items).reduce((a,b) => a+b, 0);
@@ -2620,13 +2911,20 @@
         }
         
         function toggleInventoryFlash() {
-            if (!videoTrack) return;
+            if (!videoTrack) {
+                showToast('Flashlight not available');
+                return;
+            }
             try {
                 const capabilities = videoTrack.getCapabilities();
-                if (capabilities.torch) {
+                if (capabilities && capabilities.torch) {
                     flashOn = !flashOn;
                     videoTrack.applyConstraints({ advanced: [{ torch: flashOn }] });
-                    document.getElementById('inventoryFlashBtn').classList.toggle('active', flashOn);
+                    const btn = document.getElementById('inventoryFlashBtn');
+                    btn.classList.toggle('active', flashOn);
+                    btn.classList.toggle('off', !flashOn);
+                } else {
+                    showToast('Flashlight not supported on this device');
                 }
             } catch (err) {
                 showToast('Flashlight not available');
@@ -2635,15 +2933,34 @@
         
         function toggleInventorySound() {
             soundEnabled = !soundEnabled;
-            document.getElementById('inventorySoundBtn').classList.toggle('active', soundEnabled);
+            const btn = document.getElementById('inventorySoundBtn');
+            btn.classList.toggle('active', soundEnabled);
+            btn.classList.toggle('off', !soundEnabled);
         }
         
         function stopInventoryScanner() {
-            if (scanner) { scanner.clear(); scanner = null; }
+            if (scanner) {
+                try {
+                    scanner.stop().then(() => {
+                        scanner.clear();
+                        scanner = null;
+                    }).catch(() => {
+                        scanner = null;
+                    });
+                } catch (e) {
+                    scanner = null;
+                }
+            }
             if (flashOn) flashOn = false;
-            inventory.push(currentInventorySession);
-            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
-            showToast('Scan session saved');
+            videoTrack = null;
+            
+            if (Object.keys(currentInventorySession.items).length > 0) {
+                inventory.push(currentInventorySession);
+                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+                showToast('Scan session saved');
+            } else {
+                showToast('Session ended (no items scanned)');
+            }
             loadAdminInventory();
         }
         
