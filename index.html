@@ -74,16 +74,17 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Large iOS Title header */
+        /* Large iOS Title header - iOS 26 Glass */
         .ios-header {
             padding: calc(var(--safe-top) + 8px) 20px 8px;
-            background: var(--ios-bg);
             position: sticky;
             top: 0;
             z-index: 100;
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            background: rgba(242, 242, 247, 0.85);
+            background: rgba(242, 242, 247, 0.72);
+            backdrop-filter: saturate(180%) blur(40px);
+            -webkit-backdrop-filter: saturate(180%) blur(40px);
+            border-bottom: 0.5px solid rgba(255,255,255,0.4);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.04);
         }
         .ios-header-row {
             display: flex;
@@ -103,25 +104,36 @@
             margin-top: 2px;
             font-weight: 400;
         }
+        .ios-eyebrow {
+            font-size: 15px;
+            color: var(--ios-red);
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            margin-bottom: 0;
+            text-transform: none;
+        }
         .ios-header-button {
-            background: none;
+            background: rgba(120, 120, 128, 0.12);
             border: none;
             color: var(--ios-blue);
-            font-size: 17px;
-            font-weight: 400;
+            font-size: 15px;
+            font-weight: 500;
             font-family: inherit;
             cursor: pointer;
-            padding: 4px 0;
+            padding: 6px 14px;
+            border-radius: 100px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
-        .ios-header-button.destructive { color: var(--ios-red); }
-        .ios-header-button:active { opacity: 0.4; }
+        .ios-header-button.destructive { color: var(--ios-red); background: rgba(255, 59, 48, 0.12); }
+        .ios-header-button:active { opacity: 0.5; }
         
-        /* Navigation bar (small header for sub-screens) */
+        /* Navigation bar (small header for sub-screens) - Glass */
         .nav-bar {
             padding: calc(var(--safe-top) + 8px) 16px 8px;
-            background: rgba(242, 242, 247, 0.85);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            background: rgba(242, 242, 247, 0.72);
+            backdrop-filter: saturate(180%) blur(40px);
+            -webkit-backdrop-filter: saturate(180%) blur(40px);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -129,10 +141,8 @@
             align-items: center;
             justify-content: space-between;
             min-height: 44px;
-            border-bottom: 0.5px solid transparent;
-            transition: border-color 0.2s;
+            border-bottom: 0.5px solid var(--ios-separator);
         }
-        .nav-bar.scrolled { border-bottom-color: var(--ios-separator); }
         .nav-bar-title {
             font-size: 17px;
             font-weight: 600;
@@ -214,112 +224,163 @@
             font-weight: 500;
         }
         
-        /* Hero card (Fitness app style) */
+        /* Hero card (Health 26 summary style) */
         .hero-card {
-            background: linear-gradient(135deg, #8FCC3D 0%, #4DA9DC 100%);
-            border-radius: 20px;
+            background: linear-gradient(135deg, #9BD64E 0%, #5BB5DE 100%);
+            border-radius: 24px;
             padding: 24px;
             color: white;
-            margin: 8px 0 16px;
-            box-shadow: 0 8px 24px rgba(143, 204, 61, 0.25);
+            margin: 4px 0 20px;
+            box-shadow: 
+                0 12px 32px rgba(143, 204, 61, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.3);
             position: relative;
             overflow: hidden;
         }
         .hero-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -20%;
+            top: -30%;
+            right: -10%;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -10%;
             width: 200px;
             height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(77, 169, 220, 0.4) 0%, transparent 70%);
             border-radius: 50%;
+            pointer-events: none;
         }
         .hero-greeting {
-            font-size: 15px;
-            font-weight: 500;
-            opacity: 0.9;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.95;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            position: relative;
+            z-index: 1;
         }
         .hero-name {
             font-size: 28px;
             font-weight: 700;
             margin-top: 4px;
             letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
         }
         .hero-stats {
             display: flex;
-            gap: 24px;
-            margin-top: 20px;
+            gap: 32px;
+            margin-top: 22px;
             position: relative;
             z-index: 1;
         }
         .hero-stat-num {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             line-height: 1;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.8px;
         }
         .hero-stat-label {
             font-size: 13px;
-            opacity: 0.85;
-            margin-top: 4px;
+            opacity: 0.9;
+            margin-top: 6px;
             font-weight: 500;
         }
+        .hero-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.3);
+            align-self: stretch;
+        }
         
-        /* Widget grid (Fitness/Health style) */
+        /* Widget grid (Health 26 glassy style) */
         .widget-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
         .widget {
-            background: var(--ios-card);
-            border-radius: 18px;
-            padding: 16px;
-            min-height: 120px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            border-radius: 22px;
+            padding: 18px;
+            min-height: 130px;
             display: flex;
             flex-direction: column;
             cursor: pointer;
-            transition: transform 0.15s, opacity 0.15s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s;
+            box-shadow: 
+                0 1px 3px rgba(0,0,0,0.04),
+                0 4px 16px rgba(0,0,0,0.04),
+                inset 0 0.5px 0 rgba(255,255,255,0.9);
+            border: 0.5px solid rgba(255,255,255,0.6);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
-        .widget:active { transform: scale(0.97); opacity: 0.85; }
+        .widget::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+            pointer-events: none;
+            border-radius: 22px 22px 0 0;
+        }
+        .widget:active { transform: scale(0.96); opacity: 0.9; }
         .widget-icon-wrap {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
         .widget-icon-wrap svg { width: 20px; height: 20px; }
-        .widget-icon-green { background: var(--brand-green-bg); color: var(--brand-green); }
-        .widget-icon-blue { background: var(--brand-blue-bg); color: var(--brand-blue); }
-        .widget-icon-orange { background: #FFF4E5; color: var(--ios-orange); }
-        .widget-icon-purple { background: #F5EDFB; color: var(--ios-purple); }
-        .widget-icon-pink { background: #FFE8EE; color: var(--ios-pink); }
-        .widget-icon-gray { background: var(--ios-gray5); color: var(--ios-gray); }
+        .widget-icon-green { background: linear-gradient(135deg, #B5DE6E, #8FCC3D); color: white; }
+        .widget-icon-blue { background: linear-gradient(135deg, #7BC1E4, #4DA9DC); color: white; }
+        .widget-icon-orange { background: linear-gradient(135deg, #FFB849, #FF9500); color: white; }
+        .widget-icon-purple { background: linear-gradient(135deg, #C58CE8, #AF52DE); color: white; }
+        .widget-icon-pink { background: linear-gradient(135deg, #FF6B85, #FF2D55); color: white; }
+        .widget-icon-gray { background: linear-gradient(135deg, #B5B5BB, #8E8E93); color: white; }
         
         .widget-title {
             font-size: 14px;
             font-weight: 600;
             color: var(--ios-secondary);
             margin-top: auto;
+            position: relative;
+            z-index: 1;
         }
         .widget-subtitle {
             font-size: 12px;
             color: var(--ios-tertiary);
             margin-top: 2px;
+            position: relative;
+            z-index: 1;
         }
         .widget-count {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 700;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.6px;
             line-height: 1;
-            margin-top: 4px;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
         }
         .widget-count-green { color: var(--brand-green); }
         .widget-count-blue { color: var(--brand-blue); }
@@ -411,11 +472,14 @@
         /* Cards */
         .card { 
             background: var(--ios-card); 
-            border-radius: 14px; 
+            border-radius: 16px; 
             padding: 16px; 
             margin-bottom: 10px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            box-shadow: 
+                0 1px 3px rgba(0,0,0,0.04),
+                0 2px 8px rgba(0,0,0,0.02);
             position: relative;
+            border: 0.5px solid rgba(0,0,0,0.04);
         }
         .card.urgent {
             border-left: 4px solid var(--ios-red);
@@ -455,10 +519,13 @@
         /* Floating label form cards */
         .floating-card {
             background: var(--ios-card);
-            border-radius: 14px;
+            border-radius: 16px;
             margin-bottom: 10px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            box-shadow: 
+                0 1px 3px rgba(0,0,0,0.04),
+                0 2px 8px rgba(0,0,0,0.02);
             overflow: hidden;
+            border: 0.5px solid rgba(0,0,0,0.04);
         }
         .floating-field {
             position: relative;
@@ -506,13 +573,34 @@
         .floating-field input:not(:placeholder-shown) + .floating-label,
         .floating-field textarea:focus + .floating-label,
         .floating-field textarea:not(:placeholder-shown) + .floating-label,
-        .floating-field select:valid + .floating-label,
         .floating-field.has-value .floating-label {
             top: 6px;
             font-size: 11px;
             font-weight: 500;
             color: var(--brand-blue);
             letter-spacing: 0;
+        }
+        /* Selects: only float label when has-value class is applied */
+        .floating-field select + .floating-label {
+            top: 16px;
+            font-size: 17px;
+            color: var(--ios-tertiary);
+            letter-spacing: -0.408px;
+        }
+        .floating-field.has-value select + .floating-label {
+            top: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--brand-blue);
+            letter-spacing: 0;
+        }
+        /* Selects without value: invisible text color so the empty option doesn't overlap label */
+        .floating-field select:invalid,
+        .floating-field:not(.has-value) select {
+            color: transparent;
+        }
+        .floating-field.has-value select {
+            color: var(--ios-label);
         }
         .floating-field input[type="date"] + .floating-label,
         .floating-field input[type="number"] + .floating-label {
@@ -670,23 +758,35 @@
         }
         .line-item-remove:active { opacity: 0.5; }
         
-        /* Floating pill tab bar */
+        /* Floating liquid glass tab bar - iOS 26 */
         .bottom-nav {
             position: fixed;
             bottom: calc(20px + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.78);
-            backdrop-filter: saturate(180%) blur(30px);
-            -webkit-backdrop-filter: saturate(180%) blur(30px);
-            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: saturate(200%) blur(40px);
+            -webkit-backdrop-filter: saturate(200%) blur(40px);
+            border-radius: 36px;
             padding: 8px;
             display: flex;
             justify-content: space-around;
             z-index: 1000;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.12), 
+                0 2px 6px rgba(0, 0, 0, 0.04),
+                inset 0 1px 1px rgba(255, 255, 255, 0.8),
+                inset 0 -1px 1px rgba(255, 255, 255, 0.3);
             border: 0.5px solid rgba(255, 255, 255, 0.6);
             gap: 4px;
+        }
+        .bottom-nav::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 36px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+            pointer-events: none;
         }
         .bottom-nav-item {
             display: flex;
@@ -699,14 +799,17 @@
             font-size: 10px;
             font-weight: 500;
             min-width: 56px;
-            border-radius: 24px;
-            transition: all 0.2s;
+            border-radius: 28px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             gap: 2px;
+            position: relative;
+            z-index: 1;
         }
         .bottom-nav-item svg { width: 22px; height: 22px; }
         .bottom-nav-item.active {
             color: var(--brand-green);
-            background: var(--brand-green-bg);
+            background: rgba(143, 204, 61, 0.18);
+            box-shadow: inset 0 0 0 0.5px rgba(143, 204, 61, 0.25);
         }
         .bottom-nav-item:active {
             transform: scale(0.92);
@@ -777,37 +880,42 @@
             box-shadow: inset 0 0 0 1px var(--ios-separator);
         }
         
-        /* Segmented control / Tabs */
+        /* Segmented control - Health 26 style */
         .segmented-control {
-            background: var(--ios-gray5);
-            border-radius: 9px;
+            background: rgba(120, 120, 128, 0.16);
+            border-radius: 10px;
             padding: 2px;
             display: flex;
-            margin: 12px 0;
+            margin: 14px 0 4px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
         .segmented-control::-webkit-scrollbar { display: none; }
         .segment {
             flex: 1;
             min-width: max-content;
-            padding: 6px 12px;
+            padding: 7px 14px;
             background: transparent;
             border: none;
             font-family: inherit;
             font-size: 13px;
             font-weight: 500;
             color: var(--ios-label);
-            border-radius: 7px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             white-space: nowrap;
         }
         .segment.active {
             background: white;
             font-weight: 600;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            box-shadow: 
+                0 3px 8px rgba(0,0,0,0.06), 
+                0 1px 2px rgba(0,0,0,0.04),
+                inset 0 0.5px 0 rgba(255,255,255,1);
         }
         
         /* Scanner area - iOS redesigned */
@@ -1100,6 +1208,41 @@
         /* Links */
         a { color: var(--brand-blue); text-decoration: none; }
         
+        /* Qty buttons for inventory editing */
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--ios-gray5);
+            color: var(--ios-label);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            padding: 0;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .qty-btn:active { opacity: 0.6; transform: scale(0.9); }
+        .qty-btn-remove {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #FFE8EA;
+            color: var(--ios-red);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .qty-btn-remove:active { opacity: 0.6; transform: scale(0.9); }
+        
         /* Misc helpers */
         .row-flex { display: flex; gap: 10px; align-items: center; }
         .mt-16 { margin-top: 16px; }
@@ -1199,8 +1342,8 @@
         <div class="ios-header">
             <div class="ios-header-row">
                 <div>
-                    <div class="ios-title">Today</div>
-                    <div class="ios-subtitle" id="dashDate"></div>
+                    <div class="ios-eyebrow" id="dashDate"></div>
+                    <div class="ios-title">Summary</div>
                 </div>
                 <button class="ios-header-button destructive" onclick="techLogout()">Sign Out</button>
             </div>
@@ -1214,6 +1357,7 @@
                         <div class="hero-stat-num" id="heroPending">0</div>
                         <div class="hero-stat-label">Pending</div>
                     </div>
+                    <div class="hero-divider"></div>
                     <div>
                         <div class="hero-stat-num" id="heroCompleted">0</div>
                         <div class="hero-stat-label">Completed today</div>
@@ -1315,7 +1459,7 @@
                         <input type="text" id="transferTechName" placeholder=" " readonly>
                         <label class="floating-label">Your Name</label>
                     </div>
-                    <div class="floating-field has-value">
+                    <div class="floating-field">
                         <select id="transferFrom" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
                         <label class="floating-label">Transfer From</label>
                     </div>
@@ -1515,7 +1659,7 @@
                         <input type="text" id="deliveryAddress" placeholder=" ">
                         <label class="floating-label">Address (Optional)</label>
                     </div>
-                    <div class="floating-field has-value">
+                    <div class="floating-field">
                         <select id="deliveryAssignTo" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
                         <label class="floating-label">Assign To Tech</label>
                     </div>
@@ -1564,7 +1708,7 @@
                         <input type="text" id="meterAddress" placeholder=" ">
                         <label class="floating-label">Address (Optional)</label>
                     </div>
-                    <div class="floating-field has-value">
+                    <div class="floating-field">
                         <select id="meterAssignTo" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)"></select>
                         <label class="floating-label">Assign To Tech</label>
                     </div>
@@ -1652,7 +1796,9 @@
         const transferSelect = document.getElementById('transferFrom');
         const opt1 = document.createElement('option');
         opt1.value = '';
-        opt1.textContent = 'Select...';
+        opt1.disabled = true;
+        opt1.selected = true;
+        opt1.textContent = '';
         transferSelect.appendChild(opt1);
         const opt2 = document.createElement('option');
         opt2.value = 'Main Warehouse';
@@ -1738,7 +1884,7 @@
             if (!currentTech) return;
             
             document.getElementById('techFullName').textContent = currentTech.full;
-            document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
             loadTechDashboard();
             showScreen('techDashboard');
         }
@@ -2191,7 +2337,7 @@
                     <input type="number" name="itemQty_${id}" value="1" min="1" required>
                     <label class="floating-label">Quantity</label>
                 </div>
-                <div class="floating-field has-value">
+                <div class="floating-field">
                     <select name="condition_${id}" required>
                         <option value="Used">Used</option>
                         <option value="Empty">Empty</option>
@@ -2408,7 +2554,7 @@
         
         function showAdminDeliveryForm() {
             const select = document.getElementById('deliveryAssignTo');
-            select.innerHTML = '<option value="">Select tech...</option>' + 
+            select.innerHTML = '<option value="" disabled selected></option>' + 
                 TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
             select.parentElement.classList.remove('has-value');
             document.getElementById('deliveryCustomerName').value = '';
@@ -2539,7 +2685,7 @@
         
         function showAdminMeterForm() {
             const select = document.getElementById('meterAssignTo');
-            select.innerHTML = '<option value="">Select tech...</option>' + 
+            select.innerHTML = '<option value="" disabled selected></option>' + 
                 TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('');
             select.parentElement.classList.remove('has-value');
             document.getElementById('meterCustomerName').value = '';
@@ -2569,7 +2715,7 @@
                     <input type="text" name="equipModel_${id}" placeholder=" ">
                     <label class="floating-label">Model (Optional)</label>
                 </div>
-                <div class="floating-field has-value">
+                <div class="floating-field">
                     <select name="meterType_${id}" required>
                         <option value="Black">Black Only</option>
                         <option value="Color">Color Only</option>
@@ -2744,13 +2890,117 @@
                     <button class="btn btn-tinted btn-small" onclick="exportInventory()" style="margin-bottom: 12px;">Export All to CSV</button>
                     ${inventory.map((inv, idx) => `
                         <div class="card">
-                            <div class="card-title">${inv.techName} - Scan Session</div>
+                            <div class="card-title">${inv.techName}</div>
                             <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
-                            <div class="card-meta">${Object.keys(inv.items).length} unique parts, ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total items</div>
+                            <div class="card-meta">${Object.keys(inv.items).length} unique parts · ${Object.values(inv.items).reduce((a,b) => a+b, 0)} total</div>
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                <button class="btn btn-tinted btn-small" onclick="editScanSession(${idx})">Edit</button>
+                                <button class="btn btn-small btn-danger" onclick="deleteScanSession(${idx})">Delete</button>
+                            </div>
                         </div>
                     `).join('')}
                 `}
             `;
+        }
+        
+        function deleteScanSession(idx) {
+            if (confirm('Delete this scan session? This cannot be undone.')) {
+                inventory.splice(idx, 1);
+                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+                loadAdminInventory();
+                showToast('Scan deleted');
+            }
+        }
+        
+        function editScanSession(idx) {
+            const inv = inventory[idx];
+            const el = document.getElementById('adminInventory');
+            
+            const renderItemsList = () => {
+                const items = Object.entries(inv.items).sort((a,b) => b[1] - a[1]);
+                if (items.length === 0) {
+                    return '<div class="card"><p style="color: var(--ios-tertiary);">No items in this scan</p></div>';
+                }
+                return items.map(([code, count]) => `
+                    <div class="card">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-family: 'SF Mono', monospace; font-size: 15px; font-weight: 600; word-break: break-all;">${code}</div>
+                                <div class="card-meta" style="margin-top: 2px;">Quantity: ${count}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                <button class="qty-btn" onclick="adjustScanItem(${idx}, '${code.replace(/'/g, "\\'")}', -1)">−</button>
+                                <button class="qty-btn" onclick="adjustScanItem(${idx}, '${code.replace(/'/g, "\\'")}', 1)">+</button>
+                                <button class="qty-btn-remove" onclick="removeScanItem(${idx}, '${code.replace(/'/g, "\\'")}')" title="Remove">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+            
+            el.innerHTML = `
+                <button class="btn btn-tinted btn-small" onclick="loadAdminInventory()" style="margin-bottom: 12px;">← Back</button>
+                <div class="card">
+                    <div class="card-title">${inv.techName}</div>
+                    <div class="card-meta">${new Date(inv.date).toLocaleDateString()}</div>
+                    <div class="card-meta">Scanned: ${new Date(inv.timestamp).toLocaleString()}</div>
+                    <div class="card-meta" id="editStatTotals" style="margin-top: 8px; font-weight: 500; color: var(--ios-secondary);">
+                        ${Object.keys(inv.items).length} unique · ${Object.values(inv.items).reduce((a,b)=>a+b,0)} total
+                    </div>
+                </div>
+                
+                <div class="section-header">Add Part Manually</div>
+                <div class="floating-card">
+                    <div class="floating-field">
+                        <input type="text" id="manualPartCode" placeholder=" ">
+                        <label class="floating-label">Part Number</label>
+                    </div>
+                    <div class="floating-field">
+                        <input type="number" id="manualPartQty" value="1" min="1" placeholder=" ">
+                        <label class="floating-label">Quantity</label>
+                    </div>
+                </div>
+                <button class="btn btn-tinted" onclick="addManualScanItem(${idx})">+ Add Part</button>
+                
+                <div class="section-header">Items (${Object.keys(inv.items).length})</div>
+                <div id="editItemsList">${renderItemsList()}</div>
+            `;
+        }
+        
+        function adjustScanItem(sessionIdx, code, delta) {
+            const inv = inventory[sessionIdx];
+            inv.items[code] = (inv.items[code] || 0) + delta;
+            if (inv.items[code] <= 0) {
+                delete inv.items[code];
+            }
+            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+            editScanSession(sessionIdx);
+        }
+        
+        function removeScanItem(sessionIdx, code) {
+            if (confirm(`Remove "${code}" from this scan?`)) {
+                delete inventory[sessionIdx].items[code];
+                localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+                editScanSession(sessionIdx);
+                showToast('Item removed');
+            }
+        }
+        
+        function addManualScanItem(sessionIdx) {
+            const code = document.getElementById('manualPartCode').value.trim();
+            const qty = parseInt(document.getElementById('manualPartQty').value) || 1;
+            if (!code) {
+                showToast('Part number required');
+                return;
+            }
+            const inv = inventory[sessionIdx];
+            inv.items[code] = (inv.items[code] || 0) + qty;
+            localStorage.setItem('mbs_inventory', JSON.stringify(inventory));
+            showToast(`Added ${qty}× ${code}`);
+            vibrate();
+            editScanSession(sessionIdx);
         }
         
         function showInventorySetup() {
@@ -2759,9 +3009,9 @@
                 <div class="section-header-large" style="font-size: 22px; padding: 16px 0 12px;">Setup Inventory Scan</div>
                 <form id="inventorySetupForm" onsubmit="startInventoryScanner(event)">
                     <div class="floating-card">
-                        <div class="floating-field has-value">
+                        <div class="floating-field">
                             <select id="inventoryTechSelect" required onchange="this.parentElement.classList.toggle('has-value', !!this.value)">
-                                <option value="">Choose tech...</option>
+                                <option value="" disabled selected></option>
                                 ${TECHS.map(t => `<option value="${t.full}">${t.full}</option>`).join('')}
                             </select>
                             <label class="floating-label">Select Tech</label>
@@ -2794,7 +3044,7 @@
                     <div class="card-title">Scanning: ${currentInventorySession.techName}</div>
                     <div class="card-meta">Date: ${new Date(currentInventorySession.date).toLocaleDateString()}</div>
                 </div>
-                <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save Scan</button>
+                <button class="btn btn-danger" onclick="stopInventoryScanner()">Stop & Save</button>
                 <div class="scanner-wrapper">
                     <div class="scanner-area">
                         <div id="reader"></div>
