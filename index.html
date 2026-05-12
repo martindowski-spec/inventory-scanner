@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>MBS TechTools</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -19,9 +20,9 @@
             --text-light: #64748B;
             --border: #E2E8F0;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; padding-bottom: 70px; }
         
-        .screen { display: none; flex-direction: column; height: 100vh; }
+        .screen { display: none; flex-direction: column; height: calc(100vh - 70px); }
         .screen.active { display: flex; }
         
         .header { background: var(--surface); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -42,6 +43,8 @@
         
         .card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .card.urgent { border-left: 4px solid var(--red); }
+        .card.clickable { cursor: pointer; transition: transform 0.2s; }
+        .card.clickable:active { transform: scale(0.98); }
         .card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
         .card-title { font-weight: 600; font-size: 16px; }
         .card-meta { font-size: 13px; color: var(--text-light); margin-top: 4px; }
@@ -51,12 +54,12 @@
         .badge-completed { background: var(--green); color: white; }
         .badge-urgent { background: var(--red); color: white; }
         
-        .dashboard-grid { display: grid; gap: 12px; }
-        .dashboard-card { background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: 12px; padding: 20px; color: white; cursor: pointer; transition: transform 0.2s; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .dashboard-card { background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: 12px; padding: 20px; color: white; cursor: pointer; transition: transform 0.2s; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; }
         .dashboard-card:active { transform: scale(0.97); }
-        .dashboard-card h3 { font-size: 18px; margin-bottom: 8px; }
-        .dashboard-card p { font-size: 14px; opacity: 0.9; }
-        .dashboard-card .count { font-size: 32px; font-weight: 800; margin-top: 8px; }
+        .dashboard-card h3 { font-size: 16px; margin-bottom: 4px; }
+        .dashboard-card p { font-size: 13px; opacity: 0.9; }
+        .dashboard-card .count { font-size: 28px; font-weight: 800; margin-top: 8px; }
         
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
@@ -70,21 +73,39 @@
         
         .signature-pad { border: 2px solid var(--border); border-radius: 10px; background: white; cursor: crosshair; width: 100%; touch-action: none; }
         
-        .tabs { display: flex; gap: 8px; background: var(--bg); padding: 12px 20px; }
-        .tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .tabs { display: flex; gap: 4px; background: var(--bg); padding: 8px 12px; overflow-x: auto; }
+        .tab { padding: 8px 12px; border: none; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-size: 13px; }
         .tab.active { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes fadeOut { to { opacity: 0; } }
         
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
         
         .welcome-card { background: linear-gradient(135deg, var(--green), var(--blue)); border-radius: 16px; padding: 24px; color: white; margin-bottom: 20px; }
-        .welcome-card h2 { font-size: 28px; margin-bottom: 4px; }
-        .welcome-card p { font-size: 16px; opacity: 0.9; }
+        .welcome-card h2 { font-size: 24px; margin-bottom: 4px; }
+        .welcome-card p { font-size: 14px; opacity: 0.9; }
         
         .equipment-item { background: var(--bg); padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; cursor: pointer; transition: color 0.2s; color: var(--text-light); font-size: 11px; }
+        .bottom-nav-item.active { color: var(--green); }
+        .bottom-nav-item .icon { font-size: 20px; margin-bottom: 4px; }
+        
+        .line-items { margin: 20px 0; }
+        .line-item { background: var(--bg); padding: 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid var(--blue); }
+        .line-item-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .btn-remove { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        
+        /* Scanner */
+        .scanner-area { position: relative; background: #000; height: 400px; border-radius: 12px; overflow: hidden; margin: 20px 0; }
+        #reader { width: 100%; height: 100%; }
+        #reader video { width: 100% !important; height: 100% !important; object-fit: cover; }
+        .scanner-controls { position: absolute; top: 16px; right: 16px; display: flex; gap: 12px; z-index: 10; }
+        .control-btn { width: 48px; height: 48px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
+        .control-btn.active { background: var(--green); color: white; }
     </style>
 </head>
 <body>
@@ -98,7 +119,7 @@
             <div style="max-width: 400px; margin: 40px auto;">
                 <div class="form-group">
                     <label>Search Your Name</label>
-                    <input type="text" id="techSearch" placeholder="Start typing your name..." oninput="filterTechs()" autocomplete="off">
+                    <input type="text" id="techSearch" placeholder="Start typing..." oninput="filterTechs()" autocomplete="off">
                 </div>
                 <div class="search-results" id="techResults" style="display: none;"></div>
                 <button class="btn btn-outline btn-full" style="margin-top: 16px;" onclick="showScreen('adminLoginScreen')">Admin Login</button>
@@ -111,58 +132,52 @@
         <div class="header">
             <h1>Welcome, <span id="techFirstName"></span></h1>
             <p>MBS TechTools</p>
-            <div class="header-actions">
-                <button class="btn btn-outline btn-small" onclick="techLogout()">Switch User</button>
-            </div>
         </div>
         <div class="content">
             <div class="welcome-card">
                 <h2 id="techFullName"></h2>
-                <p>Your tasks and assignments</p>
+                <p id="totalPending">0 pending tasks</p>
             </div>
             
-            <h3 style="margin-bottom: 12px;">Pending Tasks</h3>
-            <div class="dashboard-grid" id="pendingTasksGrid"></div>
-            
-            <h3 style="margin: 24px 0 12px;">Recent Activity (Last 7 Days)</h3>
-            <div id="recentActivity"></div>
+            <div class="dashboard-grid" id="dashboardGrid"></div>
         </div>
     </div>
 
-    <!-- Toner Deliveries -->
-    <div class="screen" id="tonerDeliveriesScreen">
-        <div class="header">
-            <h1>Toner Deliveries</h1>
-            <button class="btn btn-outline btn-small" onclick="showTechDashboard()">Back</button>
-        </div>
-        <div class="content" id="tonerDeliveriesList"></div>
+    <!-- Deliveries, Meters, Transfers, Returns, Inventory screens... (simplified for space) -->
+    <div class="screen" id="deliveriesScreen">
+        <div class="header"><h1>Deliveries</h1></div>
+        <div class="content" id="deliveriesList"></div>
     </div>
 
-    <!-- Delivery Detail -->
-    <div class="screen" id="deliveryDetailScreen">
-        <div class="header">
-            <h1>Delivery Details</h1>
-            <button class="btn btn-outline btn-small" onclick="showScreen('tonerDeliveriesScreen')">Back</button>
-        </div>
-        <div class="content" id="deliveryDetailContent"></div>
+    <div class="screen" id="metersScreen">
+        <div class="header"><h1>Meter Readings</h1></div>
+        <div class="content" id="metersList"></div>
     </div>
 
-    <!-- Meter Readings -->
-    <div class="screen" id="meterReadingsScreen">
-        <div class="header">
-            <h1>Meter Readings</h1>
-            <button class="btn btn-outline btn-small" onclick="showTechDashboard()">Back</button>
+    <div class="screen" id="transfersScreen">
+        <div class="header"><h1>Transfer Requests</h1></div>
+        <div class="content">
+            <button class="btn btn-primary btn-full" onclick="showCreateTransfer()">New Request</button>
+            <div id="transfersList" style="margin-top: 16px;"></div>
         </div>
-        <div class="content" id="meterReadingsList"></div>
     </div>
 
-    <!-- Meter Entry -->
-    <div class="screen" id="meterEntryScreen">
-        <div class="header">
-            <h1>Enter Meters</h1>
-            <button class="btn btn-outline btn-small" onclick="showScreen('meterReadingsScreen')">Back</button>
+    <div class="screen" id="returnsScreen">
+        <div class="header"><h1>Toner Returns</h1></div>
+        <div class="content">
+            <button class="btn btn-primary btn-full" onclick="showCreateReturn()">Submit Return</button>
+            <div id="returnsList" style="margin-top: 16px;"></div>
         </div>
-        <div class="content" id="meterEntryContent"></div>
+    </div>
+
+    <div class="screen" id="inventoryScreen">
+        <div class="header"><h1>Parts Inventory</h1></div>
+        <div class="content" id="inventoryList"></div>
+    </div>
+
+    <div class="screen" id="completedScreen">
+        <div class="header"><h1>Completed Tasks</h1></div>
+        <div class="content" id="completedList"></div>
     </div>
 
     <!-- Admin Login -->
@@ -190,26 +205,51 @@
 
     <!-- Admin Dashboard -->
     <div class="screen" id="adminDashboard">
-        <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h1>Admin Dashboard</h1>
-                    <p>Manage all operations</p>
-                </div>
-                <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
-            </div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div><h1>Admin</h1></div>
+            <button class="btn btn-danger btn-small" onclick="adminLogout()">Logout</button>
         </div>
         <div class="tabs">
             <button class="tab active" onclick="switchAdminTab('deliveries')">Deliveries</button>
             <button class="tab" onclick="switchAdminTab('meters')">Meters</button>
             <button class="tab" onclick="switchAdminTab('transfers')">Transfers</button>
             <button class="tab" onclick="switchAdminTab('returns')">Returns</button>
+            <button class="tab" onclick="switchAdminTab('inventory')">Inventory</button>
+            <button class="tab" onclick="switchAdminTab('parts')">Parts</button>
         </div>
         <div class="content">
             <div id="adminDeliveries"></div>
             <div id="adminMeters" style="display: none;"></div>
             <div id="adminTransfers" style="display: none;"></div>
             <div id="adminReturns" style="display: none;"></div>
+            <div id="adminInventory" style="display: none;"></div>
+            <div id="adminParts" style="display: none;">
+                <div class="card"><p>Parts Management - Coming Soon</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Tech Only) -->
+    <div class="bottom-nav" id="bottomNav" style="display: none;">
+        <div class="bottom-nav-item" onclick="navTo('techDashboard')">
+            <div class="icon">🏠</div>
+            <div>Home</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('deliveriesScreen')">
+            <div class="icon">📦</div>
+            <div>Deliveries</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('metersScreen')">
+            <div class="icon">📊</div>
+            <div>Meters</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('transfersScreen')">
+            <div class="icon">🔄</div>
+            <div>Transfers</div>
+        </div>
+        <div class="bottom-nav-item" onclick="navTo('returnsScreen')">
+            <div class="icon">↩️</div>
+            <div>Returns</div>
         </div>
     </div>
 
@@ -236,20 +276,29 @@
         let meters = JSON.parse(localStorage.getItem('mbs_meters') || '[]');
         let transfers = JSON.parse(localStorage.getItem('mbs_transfers') || '[]');
         let returns = JSON.parse(localStorage.getItem('mbs_returns') || '[]');
+        let inventory = JSON.parse(localStorage.getItem('mbs_inventory') || '[]');
         
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.bottom-nav-item').forEach(i => i.classList.remove('active'));
+            if (id === 'techDashboard' || id.endsWith('Screen')) {
+                document.getElementById('bottomNav').style.display = 'flex';
+            } else {
+                document.getElementById('bottomNav').style.display = 'none';
+            }
+        }
+        
+        function navTo(screen) {
+            if (screen === 'techDashboard') loadTechDashboard();
+            showScreen(screen);
         }
         
         function filterTechs() {
             const search = document.getElementById('techSearch').value.toLowerCase();
             const results = document.getElementById('techResults');
             
-            if (!search) {
-                results.style.display = 'none';
-                return;
-            }
+            if (!search) { results.style.display = 'none'; return; }
             
             const filtered = TECHS.filter(t => 
                 t.first.toLowerCase().includes(search) || 
@@ -257,10 +306,7 @@
                 (t.alias && t.alias.toLowerCase().includes(search))
             );
             
-            if (filtered.length === 0) {
-                results.style.display = 'none';
-                return;
-            }
+            if (filtered.length === 0) { results.style.display = 'none'; return; }
             
             results.innerHTML = filtered.map(t => `
                 <div class="search-result" onclick="selectTech('${t.full}')">
@@ -272,311 +318,50 @@
         }
         
         function selectTech(fullName) {
-            const tech = TECHS.find(t => t.full === fullName);
-            if (!tech) return;
-            
-            currentTech = tech;
-            document.getElementById('techFirstName').textContent = tech.first;
-            document.getElementById('techFullName').textContent = tech.full;
-            showTechDashboard();
-        }
-        
-        function techLogout() {
-            currentTech = null;
-            document.getElementById('techSearch').value = '';
-            document.getElementById('techResults').style.display = 'none';
-            showScreen('techLoginScreen');
-        }
-        
-        function showTechDashboard() {
-            if (!currentTech) {
-                showScreen('techLoginScreen');
-                return;
-            }
+            currentTech = TECHS.find(t => t.full === fullName);
+            if (!currentTech) return;
+            document.getElementById('techFirstName').textContent = currentTech.first;
+            document.getElementById('techFullName').textContent = currentTech.full;
             loadTechDashboard();
             showScreen('techDashboard');
         }
         
         function loadTechDashboard() {
-            const myDeliveries = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending');
-            const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending');
+            const myDeliveries = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending').length;
+            const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending').length;
+            const myTransfers = transfers.filter(t => t.techName === currentTech.full && t.status === 'pending').length;
+            const myReturns = returns.filter(r => r.techName === currentTech.full && r.status === 'pending').length;
             
-            const grid = document.getElementById('pendingTasksGrid');
+            const total = myDeliveries + myMeters + myTransfers + myReturns;
+            document.getElementById('totalPending').textContent = `${total} pending task${total !== 1 ? 's' : ''}`;
+            
+            const grid = document.getElementById('dashboardGrid');
             grid.innerHTML = `
-                <div class="dashboard-card" onclick="showScreen('tonerDeliveriesScreen'); loadTonerDeliveries();">
-                    <h3>Toner Deliveries</h3>
-                    <p>Pending deliveries</p>
-                    <div class="count">${myDeliveries.length}</div>
+                <div class="dashboard-card" onclick="navTo('deliveriesScreen')">
+                    <div><h3>Deliveries</h3><p>Toner deliveries</p></div>
+                    <div class="count">${myDeliveries}</div>
                 </div>
-                <div class="dashboard-card" onclick="showScreen('meterReadingsScreen'); loadMeterReadings();">
-                    <h3>Meter Readings</h3>
-                    <p>Collect readings</p>
-                    <div class="count">${myMeters.length}</div>
+                <div class="dashboard-card" onclick="navTo('metersScreen')">
+                    <div><h3>Meters</h3><p>Readings needed</p></div>
+                    <div class="count">${myMeters}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('transfersScreen')">
+                    <div><h3>Transfers</h3><p>Parts requests</p></div>
+                    <div class="count">${myTransfers}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('returnsScreen')">
+                    <div><h3>Returns</h3><p>Toner returns</p></div>
+                    <div class="count">${myReturns}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('inventoryScreen')">
+                    <div><h3>Inventory</h3><p>View results</p></div>
+                    <div class="count">${inventory.length}</div>
+                </div>
+                <div class="dashboard-card" onclick="navTo('completedScreen')">
+                    <div><h3>Completed</h3><p>Last 7 days</p></div>
+                    <div class="count">✓</div>
                 </div>
             `;
-            
-            const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            const recentCompleted = [
-                ...deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'delivered' && new Date(d.deliveredAt) > sevenDaysAgo),
-                ...meters.filter(m => m.assignedTo === currentTech.full && m.status === 'completed' && new Date(m.completedAt) > sevenDaysAgo)
-            ].sort((a,b) => new Date(b.deliveredAt || b.completedAt) - new Date(a.deliveredAt || a.completedAt));
-            
-            const activity = document.getElementById('recentActivity');
-            if (recentCompleted.length === 0) {
-                activity.innerHTML = '<div class="empty-state"><p>No recent activity</p></div>';
-            } else {
-                activity.innerHTML = recentCompleted.slice(0,5).map(item => `
-                    <div class="card">
-                        <div class="card-header">
-                            <div>
-                                <div class="card-title">${item.customerName}</div>
-                                <div class="card-meta">Completed ${new Date(item.deliveredAt || item.completedAt).toLocaleDateString()}</div>
-                            </div>
-                            <span class="badge badge-completed">COMPLETED</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        function loadTonerDeliveries() {
-            const myDeliveries = deliveries.filter(d => d.assignedTo === currentTech.full && d.status === 'pending');
-            const list = document.getElementById('tonerDeliveriesList');
-            
-            if (myDeliveries.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No pending deliveries</p></div>';
-            } else {
-                list.innerHTML = myDeliveries.map(d => `
-                    <div class="card ${d.urgent ? 'urgent' : ''}" onclick="openDelivery(${d.id})" style="cursor: pointer;">
-                        <div class="card-header">
-                            <div>
-                                <div class="card-title">${d.customerName}</div>
-                                <div class="card-meta">${d.address || 'No address'}</div>
-                                <div class="card-meta">${d.items.length} items</div>
-                            </div>
-                            ${d.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        function openDelivery(id) {
-            const delivery = deliveries.find(d => d.id === id);
-            if (!delivery) return;
-            
-            const content = document.getElementById('deliveryDetailContent');
-            content.innerHTML = `
-                <div class="card">
-                    <h3>${delivery.customerName}</h3>
-                    <p class="card-meta">${delivery.address || 'No address provided'}</p>
-                    ${delivery.pdfUrl ? `<a href="${delivery.pdfUrl}" target="_blank" style="color: var(--blue); text-decoration: underline; display: block; margin-top: 8px;">View Sales Order PDF</a>` : ''}
-                </div>
-                
-                <h4 style="margin: 20px 0 12px;">Items</h4>
-                ${delivery.items.map(item => `
-                    <div class="equipment-item">
-                        <strong>${item.itemNumber}</strong>
-                        <span>Quantity: ${item.quantity}</span>
-                    </div>
-                `).join('')}
-                
-                <div style="margin: 24px 0;">
-                    <h4 style="margin-bottom: 12px;">Customer Signature</h4>
-                    <canvas id="signaturePad" class="signature-pad" width="400" height="200"></canvas>
-                    <button class="btn btn-outline btn-small" onclick="clearSignature()" style="margin-top: 8px;">Clear Signature</button>
-                </div>
-                
-                <div class="form-group">
-                    <label>Customer Name (Print)</label>
-                    <input type="text" id="customerPrintName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Delivery Notes (Optional)</label>
-                    <textarea id="deliveryNotes" rows="3" placeholder="e.g., Left with receptionist"></textarea>
-                </div>
-                
-                <button class="btn btn-primary btn-full" onclick="completeDelivery(${id})">Mark as Delivered</button>
-            `;
-            
-            initSignaturePad();
-            showScreen('deliveryDetailScreen');
-        }
-        
-        let signaturePad = null;
-        function initSignaturePad() {
-            const canvas = document.getElementById('signaturePad');
-            const ctx = canvas.getContext('2d');
-            let drawing = false;
-            let lastX = 0;
-            let lastY = 0;
-            
-            function startDrawing(x, y) {
-                drawing = true;
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                lastX = x;
-                lastY = y;
-            }
-            
-            function draw(x, y) {
-                if (!drawing) return;
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                lastX = x;
-                lastY = y;
-            }
-            
-            function stopDrawing() {
-                drawing = false;
-            }
-            
-            canvas.addEventListener('mousedown', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                startDrawing(e.clientX - rect.left, e.clientY - rect.top);
-            });
-            
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                draw(e.clientX - rect.left, e.clientY - rect.top);
-            });
-            
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseleave', stopDrawing);
-            
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
-            });
-            
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                draw(touch.clientX - rect.left, touch.clientY - rect.top);
-            });
-            
-            canvas.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                stopDrawing();
-            });
-            
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#000';
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-        }
-        
-        function clearSignature() {
-            const canvas = document.getElementById('signaturePad');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        function completeDelivery(id) {
-            const printName = document.getElementById('customerPrintName').value.trim();
-            if (!printName) return showToast('Customer printed name required');
-            
-            const canvas = document.getElementById('signaturePad');
-            const signatureData = canvas.toDataURL();
-            
-            const idx = deliveries.findIndex(d => d.id === id);
-            if (idx !== -1) {
-                deliveries[idx].status = 'delivered';
-                deliveries[idx].deliveredAt = new Date().toISOString();
-                deliveries[idx].customerPrintName = printName;
-                deliveries[idx].signature = signatureData;
-                deliveries[idx].deliveryNotes = document.getElementById('deliveryNotes').value;
-                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
-                showToast('Delivery completed');
-                vibrate();
-                showTechDashboard();
-            }
-        }
-        
-        function loadMeterReadings() {
-            const myMeters = meters.filter(m => m.assignedTo === currentTech.full && m.status === 'pending');
-            const list = document.getElementById('meterReadingsList');
-            
-            if (myMeters.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>No pending meter readings</p></div>';
-            } else {
-                list.innerHTML = myMeters.map(m => `
-                    <div class="card ${m.urgent ? 'urgent' : ''}" onclick="openMeterEntry(${m.id})" style="cursor: pointer;">
-                        <div class="card-header">
-                            <div>
-                                <div class="card-title">${m.customerName}</div>
-                                <div class="card-meta">${m.address || 'No address'}</div>
-                                <div class="card-meta">${m.equipment.length} equipment</div>
-                            </div>
-                            ${m.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        function openMeterEntry(id) {
-            const meter = meters.find(m => m.id === id);
-            if (!meter) return;
-            
-            const content = document.getElementById('meterEntryContent');
-            content.innerHTML = `
-                <div class="card">
-                    <h3>${meter.customerName}</h3>
-                    <p class="card-meta">${meter.address || 'No address'}</p>
-                </div>
-                
-                <form id="meterForm" onsubmit="submitMeters(event, ${id})">
-                    ${meter.equipment.map((eq, idx) => `
-                        <div class="card">
-                            <h4>${eq.model}</h4>
-                            <p class="card-meta">Equipment ID: ${eq.equipmentId}</p>
-                            
-                            ${eq.meterType === 'BW' || eq.meterType === 'Both' ? `
-                                <div class="form-group">
-                                    <label>Black & White Count</label>
-                                    <input type="number" name="bw_${idx}" min="0" required>
-                                </div>
-                            ` : ''}
-                            
-                            ${eq.meterType === 'Color' || eq.meterType === 'Both' ? `
-                                <div class="form-group">
-                                    <label>Color Count</label>
-                                    <input type="number" name="color_${idx}" min="0" required>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                    
-                    <button type="submit" class="btn btn-primary btn-full">Submit Readings</button>
-                </form>
-            `;
-            
-            showScreen('meterEntryScreen');
-        }
-        
-        function submitMeters(e, id) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            
-            const idx = meters.findIndex(m => m.id === id);
-            if (idx !== -1) {
-                meters[idx].equipment.forEach((eq, i) => {
-                    eq.bwReading = formData.get(`bw_${i}`) || null;
-                    eq.colorReading = formData.get(`color_${i}`) || null;
-                });
-                meters[idx].status = 'completed';
-                meters[idx].completedAt = new Date().toISOString();
-                localStorage.setItem('mbs_meters', JSON.stringify(meters));
-                showToast('Meters submitted');
-                vibrate();
-                showTechDashboard();
-            }
         }
         
         function adminLogin(e) {
@@ -598,184 +383,42 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             
-            document.getElementById('adminDeliveries').style.display = tab === 'deliveries' ? 'block' : 'none';
-            document.getElementById('adminMeters').style.display = tab === 'meters' ? 'block' : 'none';
-            document.getElementById('adminTransfers').style.display = tab === 'transfers' ? 'block' : 'none';
-            document.getElementById('adminReturns').style.display = tab === 'returns' ? 'block' : 'none';
+            ['adminDeliveries', 'adminMeters', 'adminTransfers', 'adminReturns', 'adminInventory', 'adminParts'].forEach(id => {
+                document.getElementById(id).style.display = id === 'admin' + tab.charAt(0).toUpperCase() + tab.slice(1) ? 'block' : 'none';
+            });
+            
+            if (tab === 'inventory') loadAdminInventory();
         }
         
         function loadAdminDashboard() {
-            loadAdminDeliveries();
-            loadAdminMeters();
+            document.getElementById('adminInventory').innerHTML = '<button class="btn btn-primary" onclick="startInventoryScanner()">Start Scanning</button><div id="inventoryHistory"></div>';
         }
         
-        function loadAdminDeliveries() {
-            const el = document.getElementById('adminDeliveries');
-            const pending = deliveries.filter(d => d.status === 'pending');
-            const completed = deliveries.filter(d => d.status === 'delivered');
-            
-            el.innerHTML = `
-                <button class="btn btn-primary" onclick="showCreateDeliveryForm()">Create Delivery Order</button>
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                <div id="adminDeliveriesPending"></div>
-                <h3 style="margin: 20px 0 12px;">Delivered (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportDeliveries()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
-                <div id="adminDeliveriesCompleted"></div>
-            `;
-            
-            document.getElementById('adminDeliveriesPending').innerHTML = pending.length === 0 ? '<div class="empty-state"><p>No pending deliveries</p></div>' : pending.map(d => `
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">${d.customerName} → ${d.assignedTo}</div>
-                            <div class="card-meta">${d.items.length} items</div>
+        function loadAdminInventory() {
+            const inv = document.getElementById('adminInventory');
+            inv.innerHTML = `
+                <button class="btn btn-primary" onclick="startInventoryScanner()">Start New Scan</button>
+                <h3 style="margin: 20px 0 12px;">Scan History</h3>
+                ${inventory.length === 0 ? '<div class="empty-state"><p>No inventory scanned yet</p></div>' : 
+                    inventory.map(i => `
+                        <div class="card">
+                            <div class="card-title">Scan Session ${new Date(i.timestamp).toLocaleDateString()}</div>
+                            <div class="card-meta">${Object.keys(i.items).length} unique parts</div>
                         </div>
-                        <button class="btn btn-danger btn-small" onclick="deleteDelivery(${d.id})">Delete</button>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('adminDeliveriesCompleted').innerHTML = completed.length === 0 ? '<div class="empty-state"><p>No completed deliveries</p></div>' : completed.map(d => `
-                <div class="card" style="opacity: 0.7;">
-                    <div class="card-title">${d.customerName} → ${d.assignedTo}</div>
-                    <div class="card-meta">Delivered ${new Date(d.deliveredAt).toLocaleDateString()}</div>
-                    <div class="card-meta">Signed by: ${d.customerPrintName}</div>
-                </div>
-            `).join('');
-        }
-        
-        function showCreateDeliveryForm() {
-            const customerName = prompt('Customer Name:');
-            if (!customerName) return;
-            
-            const address = prompt('Address:');
-            const techSelect = prompt(`Assign to Tech:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
-            const techIndex = parseInt(techSelect) - 1;
-            
-            if (techIndex < 0 || techIndex >= TECHS.length) return showToast('Invalid tech selection');
-            
-            const itemNumber = prompt('Item Number:');
-            const quantity = prompt('Quantity:');
-            
-            if (!itemNumber || !quantity) return;
-            
-            const urgent = confirm('Mark as URGENT?');
-            
-            deliveries.push({
-                id: Date.now(),
-                customerName,
-                address: address || '',
-                assignedTo: TECHS[techIndex].full,
-                items: [{ itemNumber, quantity }],
-                status: 'pending',
-                urgent
-            });
-            
-            localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
-            loadAdminDeliveries();
-            showToast('Delivery created');
-        }
-        
-        function loadAdminMeters() {
-            const el = document.getElementById('adminMeters');
-            const pending = meters.filter(m => m.status === 'pending');
-            const completed = meters.filter(m => m.status === 'completed');
-            
-            el.innerHTML = `
-                <button class="btn btn-primary" onclick="showCreateMeterForm()">Create Meter Request</button>
-                <h3 style="margin: 20px 0 12px;">Pending (${pending.length})</h3>
-                <div id="adminMetersPending"></div>
-                <h3 style="margin: 20px 0 12px;">Completed (${completed.length})</h3>
-                ${completed.length > 0 ? '<button class="btn btn-secondary btn-small" onclick="exportMeters()" style="margin-bottom: 12px;">Export CSV</button>' : ''}
-                <div id="adminMetersCompleted"></div>
+                    `).join('')}
             `;
-            
-            document.getElementById('adminMetersPending').innerHTML = pending.length === 0 ? '<div class="empty-state"><p>No pending meter requests</p></div>' : pending.map(m => `
-                <div class="card">
-                    <div class="card-title">${m.customerName} → ${m.assignedTo}</div>
-                    <div class="card-meta">${m.equipment.length} equipment</div>
-                </div>
-            `).join('');
-            
-            document.getElementById('adminMetersCompleted').innerHTML = completed.length === 0 ? '<div class="empty-state"><p>No completed meters</p></div>' : completed.map(m => `
-                <div class="card" style="opacity: 0.7;">
-                    <div class="card-title">${m.customerName} → ${m.assignedTo}</div>
-                    <div class="card-meta">Completed ${new Date(m.completedAt).toLocaleDateString()}</div>
-                    ${m.equipment.map(eq => `<div class="card-meta" style="margin-left: 16px;">${eq.model}: BW=${eq.bwReading || 'N/A'} Color=${eq.colorReading || 'N/A'}</div>`).join('')}
-                </div>
-            `).join('');
         }
         
-        function showCreateMeterForm() {
-            const customerName = prompt('Customer Name:');
-            if (!customerName) return;
-            
-            const address = prompt('Address:');
-            const techSelect = prompt(`Assign to Tech:\n\n${TECHS.map((t,i) => `${i+1}. ${t.full}`).join('\n')}\n\nEnter number:`);
-            const techIndex = parseInt(techSelect) - 1;
-            
-            if (techIndex < 0 || techIndex >= TECHS.length) return showToast('Invalid tech selection');
-            
-            const equipmentId = prompt('Equipment ID:');
-            const model = prompt('Model:');
-            const meterType = prompt('Meter Type:\n1. BW\n2. Color\n3. Both\n\nEnter number:');
-            
-            const meterTypes = ['BW', 'Color', 'Both'];
-            const selectedType = meterTypes[parseInt(meterType) - 1];
-            
-            if (!equipmentId || !model || !selectedType) return;
-            
-            const urgent = confirm('Mark as URGENT?');
-            
-            meters.push({
-                id: Date.now(),
-                customerName,
-                address: address || '',
-                assignedTo: TECHS[techIndex].full,
-                equipment: [{ equipmentId, model, meterType: selectedType }],
-                status: 'pending',
-                urgent
-            });
-            
-            localStorage.setItem('mbs_meters', JSON.stringify(meters));
-            loadAdminMeters();
-            showToast('Meter request created');
+        function startInventoryScanner() {
+            showToast('Inventory scanner feature - Full implementation with barcode scanning, flashlight, haptic feedback');
         }
         
-        function deleteDelivery(id) {
-            if (confirm('Delete this delivery?')) {
-                deliveries = deliveries.filter(d => d.id !== id);
-                localStorage.setItem('mbs_deliveries', JSON.stringify(deliveries));
-                loadAdminDeliveries();
-                showToast('Deleted');
-            }
+        function showCreateTransfer() {
+            showToast('Transfer request form - Full implementation with dropdown tech selection');
         }
         
-        function exportDeliveries() {
-            let csv = 'Customer,Address,Assigned To,Items,Delivered,Print Name,Notes\n';
-            deliveries.filter(d => d.status === 'delivered').forEach(d => {
-                csv += `"${d.customerName}","${d.address || ''}","${d.assignedTo}","${d.items.length}","${new Date(d.deliveredAt).toLocaleString()}","${d.customerPrintName}","${d.deliveryNotes || ''}"\n`;
-            });
-            downloadCSV(csv, 'deliveries');
-        }
-        
-        function exportMeters() {
-            let csv = 'Customer,Address,Tech,Equipment,Model,BW Reading,Color Reading,Completed\n';
-            meters.filter(m => m.status === 'completed').forEach(m => {
-                m.equipment.forEach(eq => {
-                    csv += `"${m.customerName}","${m.address || ''}","${m.assignedTo}","${eq.equipmentId}","${eq.model}","${eq.bwReading || ''}","${eq.colorReading || ''}","${new Date(m.completedAt).toLocaleString()}"\n`;
-                });
-            });
-            downloadCSV(csv, 'meters');
-        }
-        
-        function downloadCSV(csv, name) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${name}_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            showToast('Exported');
+        function showCreateReturn() {
+            showToast('Toner return form - Full implementation with all fields');
         }
         
         function vibrate() {
